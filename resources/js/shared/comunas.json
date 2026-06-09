@@ -1,0 +1,46 @@
+[
+    {
+      "zona": "Urbana",
+      "lugares": [
+        { "value": "1", "label": "Boston" },
+        { "value": "2", "label": "Centro" },
+        { "value": "3", "label": "Consota" },
+        { "value": "4", "label": "Cuba" },
+        { "value": "5", "label": "Del Cafe" },
+        { "value": "6", "label": "El Jardin" },
+        { "value": "7", "label": "El Oso" },
+        { "value": "8", "label": "El Poblado" },
+        { "value": "9", "label": "El Rocio" },
+        { "value": "10", "label": "Ferrocarril" },
+        { "value": "11", "label": "Olimpica" },
+        { "value": "12", "label": "Oriente" },
+        { "value": "13", "label": "Perla Del Otun" },
+        { "value": "14", "label": "Rio Otun" },
+        { "value": "15", "label": "San Joaquin" },
+        { "value": "16", "label": "San Nicolas" },
+        { "value": "17", "label": "Universidad" },
+        { "value": "18", "label": "Villa Santana" },
+        { "value": "19", "label": "Villavicencio" },
+        { "value": "0", "label": "Otro" }
+      ]
+    },
+    {
+      "zona": "Rural",
+      "lugares": [
+        { "value": "20", "label": "Altagracia" },
+        { "value": "21", "label": "Arabia" },
+        { "value": "22", "label": "Caimalito" },
+        { "value": "23", "label": "Cerritos" },
+        { "value": "24", "label": "Combia Alta" },
+        { "value": "25", "label": "Combia Baja" },
+        { "value": "26", "label": "La Bella" },
+        { "value": "27", "label": "La Estrella -- La palmilla" },
+        { "value": "28", "label": "La Florida" },
+        { "value": "29", "label": "Morelia" },
+        { "value": "30", "label": "Puerto Caldas" },
+        { "value": "31", "label": "Tribunas Córcega" },
+        { "value": "0", "label": "Otro" }
+
+      ]
+    }
+  ]

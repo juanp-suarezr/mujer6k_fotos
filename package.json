@@ -1,0 +1,44 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build"
+    },
+    "devDependencies": {
+        "@inertiajs/vue3": "^1.0.0",
+        "@tailwindcss/forms": "^0.5.3",
+        "@vitejs/plugin-vue": "^5.0.0",
+        "autoprefixer": "^10.4.12",
+        "axios": "^1.6.4",
+        "laravel-vite-plugin": "^1.0.0",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.2.1",
+        "vite": "^5.0.0",
+        "vue": "^3.4.0"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.5.2",
+        "@fortawesome/free-brands-svg-icons": "^6.5.2",
+        "@fortawesome/free-regular-svg-icons": "^6.5.2",
+        "@fortawesome/free-solid-svg-icons": "^6.5.2",
+        "@fortawesome/vue-fontawesome": "^3.0.6",
+        "@heroicons/vue": "^2.1.1",
+        "@primeuix/themes": "^1.0.0",
+        "aos": "^2.3.4",
+        "chart.js": "^4.5.0",
+        "chartjs-plugin-datalabels": "^2.2.0",
+        "date-fns": "^3.6.0",
+        "jspdf": "^3.0.1",
+        "particles.js": "^2.0.0",
+        "primevue": "^4.3.2",
+        "vanilla-tilt": "^1.8.1",
+        "vue-chartjs": "^5.3.2",
+        "vue-easy-lightbox": "^1.19.0",
+        "vue-qrcode": "^2.2.2",
+        "vue-qrcode-component": "^2.1.1",
+        "vue-recaptcha-v3": "^2.0.1",
+        "vue-sweetalert2": "^5.0.5",
+        "vue-toast-notification": "^3.1.2"
+    }
+}
