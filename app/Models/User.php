@@ -44,13 +44,4 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
-    public function informacionUsuario()
-    {
-        return $this->belongsTo(InformacionUsuario::class, 'id', 'user_id');
-    }
-    public function caninos()
-    {
-        return $this->hasMany(Caninos::class, 'user_id', 'id');
-    }
 }

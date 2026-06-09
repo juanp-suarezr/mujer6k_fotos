@@ -1,66 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\api;
 
-use App\Models\Evento;
-use App\Models\Corredor;
-use App\Models\Foto;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\CorredorRequest;
-use App\Http\Requests\FotoRequest;
-use Inertia\Inertia;
+use App\Models\Corredor;
 
 class CorredorController extends Controller
 {
-    function __construct()
+    public function index()
     {
-        $this->middleware('permission:corredores-listar|corredores-crear|corredores-editar|corredores-eliminar', ['only' => ['index', 'store']]);
-        $this->middleware('permission:corredores-crear', ['only' => ['create', 'store']]);
-        $this->middleware('permission:corredores-editar', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:corredores-eliminar', ['only' => ['destroy']]);
+        return response()->json(Corredor::with('evento')->get(), 200);
     }
 
-    function index()
+    public function store(CorredorRequest $request)
     {
-        return Inertia::render('Corredores/Index', [
-            'corredores' => Corredor::with('evento')->paginate(10)->withQueryString(),
-        ]);
+        $corredor = Corredor::create($request->validated());
+        return response()->json($corredor, 201);
     }
 
-    function create()
+    public function show(Corredor $corredor)
     {
-        return Inertia::render('Corredores/Add', [
-            'eventos' => Evento::all(),
-        ]);
+        return response()->json($corredor->load('evento', 'fotos'), 200);
     }
 
-    function store(CorredorRequest $request)
-    {
-        Corredor::create($request->validated());
-
-        return to_route('corredores.index');
-    }
-
-    function edit(Corredor $corredor)
-    {
-        return Inertia::render('Corredores/Edit', [
-            'corredor' => $corredor->load('evento'),
-            'eventos' => Evento::all(),
-        ]);
-    }
-
-    function update(CorredorRequest $request, Corredor $corredor)
+    public function update(CorredorRequest $request, Corredor $corredor)
     {
         $corredor->update($request->validated());
-
-        return redirect()->route('corredores.edit', $corredor->id)
-            ->with('success', 'Corredor actualizado correctamente');
+        return response()->json($corredor, 200);
     }
 
-    function destroy(Corredor $corredor)
+    public function destroy(Corredor $corredor)
     {
         $corredor->delete();
-
-        return redirect()->route('corredores.index')
-            ->with('success', 'Corredor eliminado exitosamente');
+        return response()->json(null, 204);
     }
 }
