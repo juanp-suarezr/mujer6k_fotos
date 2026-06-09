@@ -16,6 +16,9 @@ use App\Http\Controllers\PuntosController;
 use App\Http\Controllers\RegistrosGemelosController;
 use App\Http\Controllers\RestaurantesController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\EventoController;
+use App\Http\Controllers\CorredorController;
+use App\Http\Controllers\FotoController;
 use App\Models\Caninos;
 use App\Models\PageView;
 use App\Models\Perfil;
@@ -156,6 +159,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('registradosUnicos', RegistrosGemelosController::class);
     Route::resource('registros', RegistroController::class);
     Route::resource('evidencias', EvidenciasController::class);
+    Route::resource('eventos', EventoController::class);
+    Route::resource('corredores', CorredorController::class);
+    Route::resource('fotos', FotoController::class);
 });
 
 

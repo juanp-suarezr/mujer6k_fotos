@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\api\RegistroController;
+use App\Http\Controllers\api\EventoController as ApiEventoController;
+use App\Http\Controllers\api\CorredorController as ApiCorredorController;
+use App\Http\Controllers\api\FotoController as ApiFotoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\UserAuthController;
@@ -30,12 +33,9 @@ Route::get('userinfo',function () {
 // Protected routes
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('/logout', [UserAuthController::class, 'logout']);
-
-/*     Route::controller(ProductController::class)->group(function() {
-        Route::post('/products', 'store');
-        Route::post('/products/{id}', 'update');
-        Route::delete('/products/{id}', 'destroy');
-    }); */
+    Route::apiResource('eventos', ApiEventoController::class);
+    Route::apiResource('corredores', ApiCorredorController::class);
+    Route::apiResource('fotos', ApiFotoController::class);
 });
 
 Route::get('/registrados-api', [RegistroController::class, 'index']);
