@@ -1,131 +1,178 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Plataforma de Gestión de Fotografías Deportivas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación Laravel 10 con Inertia.js + Vue 3 para gestionar eventos deportivos, corredores y fotografías organizadas por dorsal.
 
+## Requisitos
 
-## Acerca del proyecto
-
-Starter Project | Inicio de proyecto con panel de administración hecho con Laravel 10 e Inertia + VUE:
-CRUD Usuarios
-CRUD Roles
-
-Con este template puedes iniciar cualquier proyecto que necesite administrar usuarios y permisos, con inicio de sesión, filtro de busqueda, alertas, y componentes utiles para tu proyecto.
-
-- [Laravel-permission](https://spatie.be/index.php/docs/laravel-permission/v6/introduction).
-- [Iconos](https://heroicons.com/).
-- Alertas notificaciones con SweetAlert [Documentacion](https://sweetalert2.github.io/).
-- [Componentes Utilizados en el proyecto](https://primevue.org/).
-
+- PHP >= 8.1
+- Composer
+- Node.js >= 16
+- MySQL / MariaDB
+- XAMPP (recomendado para entorno local)
 
 ## Instalación
 
-Debes tener acceso a una base de datos para cambiar la conexión en el laravel archivo env.
-***
-Clonar repositorio e instalar dependencias.
-```
-git clone https://github.com/kenedy1909/template-administracion-laravel
-npm install
+```bash
+# 1. Clonar el repositorio
+git clone <repo-url>
+cd mujer6k_fotos
+
+# 2. Instalar dependencias PHP
 composer install
+
+# 3. Instalar dependencias JS
+npm install
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+php artisan key:generate
 ```
 
-Realizar conexión a base de datos para realizar las migraciones. Abrir .env del proyecto.
-```
+## Base de Datos
+
+### Opción A: Crear BD vacía y ejecutar migraciones
+
+```bash
+# 1. Crear base de datos en MySQL
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS fotos_deportivas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 2. Configurar .env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE= Nombre de su base de datos
-DB_USERNAME= Nombre de usuario
-DB_PASSWORD= Contraseña 
+DB_DATABASE=fotos_deportivas
+DB_USERNAME=root
+DB_PASSWORD=
 
-```
-Una vez realizado el paso anterior, ejecutamos las migraciones
-```
-php artisan migrate
-
-```
-Realizamos la insersión de datos (permisos, roles y usuario administrador) para ingresar al proyecto.
-```
-php artisan db:seed  PermissionTableSeeder 
-php artisan db:seed  CreateAdminUserSeeder  
-
+# 3. Ejecutar migraciones + seeders
+php artisan migrate --force
+php artisan db:seed --force
 ```
 
-Ejecutar el proyecto en desarrollo. Abrir dos terminales en su VScode.
-NPM
-```
-npm run dev   
+### Opción B: Importar script SQL completo
 
-```
+```bash
+# 1. Crear BD vacía
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS fotos_deportivas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-Segunda terminal. artisan serve 
-```
-php artisan serve 
-
+# 2. Importar script estructural (tablas + seeders iniciales)
+mysql -u root fotos_deportivas < database/sql/estructura_inicial.sql
 ```
 
-## About Laravel
+> **Nota**: el archivo `estructura_inicial.sql` se incluye en `database/sql/` y crea todas las tablas necesarias para levantar el sistema sin ejecutar migraciones.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Ejecución
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+# Compilar assets
+npm run build
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Levantar servidor Laravel
+php artisan serve
 
-## Learning Laravel
+# Visitar
+http://localhost:8000
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Credenciales por defecto
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Campo | Valor |
+|-------|-------|
+| Email | admin@admin.com |
+| Password | 123456 |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Funcionalidades
 
-## Laravel Sponsors
+### Público
+- Página de bienvenida (Welcome)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Autenticación
+- Login / Logout
+- Registro de usuarios
+- Recuperación de contraseña
+- Gestión de perfil (editar / eliminar cuenta)
 
-### Premium Partners
+### Panel Administrativo (requiere permisos)
+- **Usuarios**: CRUD completo + asignación de roles
+- **Roles**: CRUD completo + asignación de permisos
+- **Eventos**: CRUD de eventos deportivos
+- **Corredores**: CRUD de participantes por dorsal y evento
+- **Fotos**: CRUD de fotografías asociadas a corredores y eventos
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### API REST (Sanctum)
+- `GET /api/user` - Usuario autenticado
+- `POST /api/login` - Login API
+- `POST /api/logout` - Logout API
+- `GET/POST/PUT/DELETE /api/eventos` - Eventos
+- `GET/POST/PUT/DELETE /api/corredores` - Corredores
+- `GET/POST/PUT/DELETE /api/fotos` - Fotos
 
-## Contributing
+## Estructura del Proyecto
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── api/           # Controladores API REST
+│   │   └── Auth/          # Controladores de autenticación
+│   └── Requests/          # Formularios de validación
+├── Models/                # Modelos Eloquent
+└── Providers/             # Service Providers
 
-## Code of Conduct
+database/
+├── factories/             # Factories para testing
+├── migrations/            # Migraciones
+├── seeders/               # Seeders iniciales
+└── sql/                   # Scripts SQL alternativos
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+resources/js/
+├── Components/            # Componentes Vue reutilizables
+├── Layouts/               # Layouts (auth, guest, app)
+└── Pages/                 # Vistas por recurso
+    ├── Auth/
+    ├── Dashboard.vue
+    ├── Eventos/
+    ├── Corredores/
+    ├── Fotos/
+    └── Users/
+```
 
-## Security Vulnerabilities
+## Modelos y Relaciones
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```
+Evento
+├── hasMany Corredores
+└── hasMany Fotos
 
-## License
+Corredor
+├── belongsTo Evento
+└── hasMany Fotos
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Foto
+├── belongsTo Evento
+└── belongsTo Corredor
 
-## Iconos
+User
+└── belongsToMany Roles (Spatie Permission)
+```
 
-https://heroicons.com/# salubridad_alcaldia
+## Próximas Fases
+
+- [ ] Fase 2: Importación masiva desde Google Drive
+- [ ] Fase 3: Almacenamiento en MinIO / S3
+- [ ] Fase 4: Procesamiento de imágenes (resize, watermark)
+- [ ] Fase 5: Búsqueda pública de fotos por dorsal
+- [ ] Fase 6: Galerías y compartición de álbumes
+
+## Stack Tecnológico
+
+- **Backend**: Laravel 10, PHP 8.1+
+- **Frontend**: Vue 3, Inertia.js, Tailwind CSS
+- **Auth**: Laravel Breeze + Sanctum
+- **Permisos**: Spatie Laravel Permission
+- **Base de datos**: MySQL / MariaDB
+- **Testing**: PHPUnit + Laravel Sail (opcional)
+
+## Licencia
+
+MIT
