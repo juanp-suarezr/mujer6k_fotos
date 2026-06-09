@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('fotos');
         Schema::create('fotos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('evento_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('corredor_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('evento_id')->constrained('eventos')->cascadeOnDelete();
+            $table->foreignId('corredor_id')->constrained('corredores')->cascadeOnDelete();
             $table->string('nombre_archivo');
             $table->string('ruta_storage');
             $table->string('url_publica')->nullable();

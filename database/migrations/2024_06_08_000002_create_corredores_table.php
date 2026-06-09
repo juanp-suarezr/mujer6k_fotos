@@ -8,9 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::dropIfExists('corredores');
         Schema::create('corredores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('evento_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('evento_id')->constrained('eventos')->cascadeOnDelete();
             $table->integer('dorsal');
             $table->string('nombre_completo')->nullable();
             $table->string('documento')->nullable();

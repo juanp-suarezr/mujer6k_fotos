@@ -9,6 +9,7 @@ class Corredor extends Model
 {
     use HasFactory;
 
+    protected $table = 'corredores';
     protected $fillable = [
         'evento_id',
         'dorsal',
