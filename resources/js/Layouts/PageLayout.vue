@@ -13,7 +13,7 @@
                             class="lg:rounded-lg rounded-md lg:w-5/6 w-full flex justify-center shadow-lg lg:p-2 p-1 text-azul bg-white [&>svg]:w-full">
 
                             <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                viewBox="0 0 512 512">
                                 <path
                                     d="M448 256c0-106-86-192-192-192V448c106 0 192-86 192-192zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z" />
                             </svg>
@@ -59,6 +59,7 @@
             </a>
         </header>
         <nav class="w-full h-full bg-option2 py-2 text-xl sm:text-2xl text-parrafo z-20" :class="[
+            !home ? 'hidden' : '',    
             { '!text-yellow-200 font-bold !bg-black': HandleContrast },
             HandleLetra == -2 ? '!text-base !sm:text-lg'
                 : HandleLetra == -1 ? '!text-lg !sm:text-xl'
@@ -216,6 +217,13 @@ import { faInstagram, faFacebook, faYoutube } from '@fortawesome/free-brands-svg
 import { usePage } from '@inertiajs/vue3';
 import { ref, watch, inject } from 'vue';
 import { useToast } from 'vue-toast-notification';
+
+const props = defineProps({
+    home: {
+        type: Boolean,
+        default: false,
+    }
+});
 
 
 const $toast = useToast();

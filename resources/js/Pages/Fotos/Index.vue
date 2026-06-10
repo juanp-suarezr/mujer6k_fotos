@@ -28,7 +28,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center">
                     <div class="h-10 w-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center mr-3">
-                      <ImageIcon class="h-5 w-5 text-gray-400" />
+                      <PhotoIcon class="h-5 w-5 text-gray-400" />
                     </div>
                     <div class="flex flex-col">
                       <span class="font-medium text-gray-800">{{ foto.nombre_archivo }}</span>
@@ -125,7 +125,7 @@ import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { PencilIcon, TrashIcon, PhotoIcon, ImageIcon } from '@heroicons/vue/24/solid';
+import { PencilIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   fotos: { type: Object, required: true },

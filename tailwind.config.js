@@ -24,6 +24,7 @@ export default {
                 parrafo: '#585857', //Párrafo, fondo dropdowns en HOVER, tab laterales, encabezados tablas
                 azul: '#004884',
                 amarillo: '#FFBA00',
+                naranja: '#F57C00',
             },
             // fontSize: {
             //     xs: ['0.75rem', { lineHeight: '1rem' }], // 12px
