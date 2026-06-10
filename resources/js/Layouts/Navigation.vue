@@ -30,6 +30,16 @@
                 <CameraIcon class="h-6 w-6 text-white" />
                 <span class="mx-3">Fotos</span>
             </nav-link>
+
+            <SeparadorMenu>Administración</SeparadorMenu>
+            <nav-link :href="route('users.index')" :active="route().current().includes('users')">
+                <UsersIcon class="h-6 w-6 text-white" />
+                <span class="mx-3">Usuarios</span>
+            </nav-link>
+            <nav-link :href="route('roles.index')" :active="route().current().includes('roles')">
+                <KeyIcon class="h-6 w-6 text-white" />
+                <span class="mx-3">Roles</span>
+            </nav-link>
         </nav>
     </div>
 </template>
@@ -39,16 +49,18 @@ import NavLink from '@/Components/NavLink.vue';
 import SeparadorMenu from "@/Components/SeparadorMenu.vue";
 import imglogo_w from '/public/assets/img/logo_white.webp'
 import { ref } from 'vue'
-import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon } from '@heroicons/vue/24/solid'
+import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon, UsersIcon, KeyIcon } from '@heroicons/vue/24/solid'
 
 export default {
     components: {
         NavLink,
         SeparadorMenu,
         HomeIcon,
+        UsersIcon,
         UserGroupIcon,
         CalendarIcon,
         CameraIcon,
+        KeyIcon,
     },
 
     setup() {

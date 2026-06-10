@@ -82,8 +82,8 @@
               required
             >
               <option value="" disabled>Seleccione un rol</option>
-              <option v-for="role in roles" :key="role.name" :value="role.name">
-                {{ role.name }}
+              <option v-for="(name, id) in roles" :key="id" :value="name">
+                {{ name }}
               </option>
             </select>
             <InputError class="mt-2" :message="form.errors.role" />
