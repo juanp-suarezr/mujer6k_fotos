@@ -16,7 +16,7 @@
           <h3 class="text-lg font-semibold text-gray-800">Datos del usuario: {{ user.name }}</h3>
         </div>
         <div class="p-6">
-          <UpdateProfileInformationForm :user="user" :roles="roles" />
+          <UpdateProfileInformationForm :user="user" :roles="roles" :userRoles="userRoles" />
           <hr class="my-8 border-gray-200" />
           <UpdatePasswordForm :user="user" />
         </div>
@@ -32,12 +32,16 @@ import UpdatePasswordForm from '@/Pages/Users/Partials/UpdatePasswordForm.vue';
 import { Link } from '@inertiajs/vue3';
 import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
 
-defineProps({
+const props = defineProps({
   user: {
     type: Object,
     required: true,
   },
   roles: {
+    type: Array,
+    required: true,
+  },
+  userRoles: {
     type: Array,
     required: true,
   },

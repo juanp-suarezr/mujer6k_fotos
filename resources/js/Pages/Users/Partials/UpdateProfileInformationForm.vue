@@ -14,17 +14,25 @@ const props = defineProps({
         default: () => ({}),
     },
     roles: {
-        type: Object,
-        default: () => ({}),
+        type: Array,
+        default: () => [],
     },
     userRoles: {
-        type: Object,
-        default: () => ({}),
+        type: Array,
+        default: () => [],
     },
 });
 
-const selectedRoles = Object.values(props.userRoles);
 const user = props.user;
+
+console.log(props);
+
+const form = useForm({
+    name: user.name,
+    email: user.email,
+    estado: user.estado,
+    roles_user: [...props.userRoles],
+});
 
 const submit = () => {
     form.patch(route('users.update', user.id), {
@@ -35,13 +43,6 @@ const submit = () => {
         })
     });
 };
-
-const form = useForm({
-    name: user.name,
-    email: user.email,
-    estado: user.estado,
-    roles_user: selectedRoles
-});
 </script>
 
 <template>
@@ -73,8 +74,8 @@ const form = useForm({
                 <InputLabel for="roles" value="Roles" />
 
                 <div class="card flex justify-content-center">
-                    <MultiSelect id="roles" v-model="form.roles_user" display="chip" :options="Object.values(roles)"
-                        placeholder="Seleccione rol" :maxSelectedLabels="3" class="w-full md:w-20rem" />
+                    <MultiSelect id="roles" v-model="form.roles_user" display="chip" :options="roles"
+                        optionLabel="name" optionValue="id" placeholder="Seleccione rol" :maxSelectedLabels="3" class="w-full md:w-20rem" />
                 </div>
                 <InputError class="mt-2" :message="form.errors.roles_user" />
             </div>

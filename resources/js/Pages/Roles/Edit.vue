@@ -25,7 +25,7 @@
             <InputLabel value="Permisos" />
             <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label v-for="perm in permission" :key="perm.id" class="flex items-center gap-2 p-2 rounded border border-gray-200 hover:bg-gray-50">
-                <input type="checkbox" :value="perm.id" v-model="form.permisos" :checked="rolePermissions.includes(perm.id)" class="rounded text-blue-600 focus:ring-blue-500" />
+                <input type="checkbox" :value="perm.id" v-model="form.permisos" :checked="permission.includes(perm.id)" class="rounded text-blue-600 focus:ring-blue-500" />
                 <span class="text-sm text-gray-700">{{ perm.name }}</span>
               </label>
             </div>
@@ -51,12 +51,12 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeftIcon } from '@heroicons/vue/24/solid';
 
-defineProps({
+const props = defineProps({
   role: {
     type: Object,
     required: true,
   },
-  permissions: {
+  permission: {
     type: Array,
     required: true,
   },
@@ -64,14 +64,18 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  
 });
 
+console.log(props);
+
+
 const form = useForm({
-  name: '',
-  permisos: [],
+    name: props.role.name,
+    permisos: Object.values(props.rolePermissions).map(Number),
 });
 
 const submit = () => {
-  form.put(route('roles.update', role.id));
+  form.put(route('roles.update', props.role.id));
 };
 </script>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -61,12 +61,11 @@ class UserController extends Controller
 
     function edit(User $user)
     {
-        $roles = Role::pluck('name', 'id');
-        $userRoles = $user->getRoleNames()->toArray();
-
+        $userRoles = $user->roles()->pluck('roles.id')->toArray();
+        
         return Inertia::render('Users/Edit', [
             'user' => $user,
-            'roles' => $roles,
+            'roles' => Role::all(['id', 'name']),
             'userRoles' => $userRoles,
         ]);
     }
