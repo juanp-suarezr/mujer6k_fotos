@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\GoogleConnectionStatus;
 use App\Models\GoogleConnection;
 use Google\Client;
 use Google\Service\Drive;
@@ -48,7 +49,7 @@ class GoogleClient
 
     public function exchangeCodeForTokens(string $code): array
     {
-        $token = $this->client->fetchAccessTokenWithAuthCode([$code]);
+        $token = $this->client->fetchAccessTokenWithAuthCode($code);
 
         if (isset($token['error'])) {
             throw new RuntimeException($token['error']);
@@ -74,7 +75,7 @@ class GoogleClient
             $connection->expires_at = now()->addSeconds((int) $decoded['expires_in']);
         }
 
-        $connection->status = 'connected';
+        $connection->status = GoogleConnectionStatus::Conectado->value;
         $connection->last_error = null;
         $connection->save();
     }
@@ -125,13 +126,16 @@ class GoogleClient
         }
 
         if (!$connection->refresh_token) {
+            $connection->status = GoogleConnectionStatus::Invalido->value;
+            $connection->last_error = 'La cuenta Google no tiene refresh token.';
+            $connection->save();
             throw new RuntimeException('La cuenta Google no tiene refresh token.');
         }
 
         $token = $this->client->fetchAccessTokenWithRefreshToken($connection->refresh_token);
 
         if (isset($token['error'])) {
-            $connection->status = 'invalid';
+            $connection->status = GoogleConnectionStatus::Invalido->value;
             $connection->last_error = $token['error'];
             $connection->save();
 
@@ -146,7 +150,7 @@ class GoogleClient
             $connection->expires_at = now()->addSeconds((int) $decoded['expires_in']);
         }
 
-        $connection->status = 'connected';
+        $connection->status = GoogleConnectionStatus::Conectado->value;
         $connection->last_error = null;
         $connection->save();
     }

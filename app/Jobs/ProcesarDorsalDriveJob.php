@@ -4,10 +4,11 @@ namespace App\Jobs;
 
 use App\Enums\FotoEstado;
 use App\Enums\LogTipo;
-use App\Models\Foto;
 use App\Models\Corredor;
+use App\Models\Foto;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
+use App\Services\SyncService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,98 +20,107 @@ class ProcesarDorsalDriveJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 5;
-    public int $backoff = 10;
+
+    public array $backoff = [10, 30, 120, 300];
+
+    public int $maxExceptions = 5;
 
     public function __construct(
         public int $importacionId,
         public string $folderId,
-        public string $dorsal,
-        public ?GoogleDriveService $driveService = null
+        public string $dorsal
     ) {}
 
-    public function handle(GoogleDriveService $driveService): void
+    public function handle(GoogleDriveService $driveService, SyncService $syncService): void
     {
         $importacion = Importacion::findOrFail($this->importacionId);
         $corredor = Corredor::where('evento_id', $importacion->evento_id)
             ->where('dorsal', $this->dorsal)
             ->first();
 
-        $archivosProcesados = $this->procesarConPaginacion($driveService, $importacion, $corredor);
+        $processed = 0;
 
-        $importacion->increment('procesados', $archivosProcesados);
-
-        $this->registrarLog($importacion, LogTipo::Info, "Dorsal {$this->dorsal}: {$archivosProcesados} fotos indexadas");
-    }
-
-    protected function procesarConPaginacion(GoogleDriveService $driveService, Importacion $importacion, ?Corredor $corredor): int
-    {
-        $archivosProcesados = 0;
-        $pageToken = null;
-
-        do {
-            try {
-                $options = [
-                    'q' => "'{$this->folderId}' in parents and trashed = false and mimeType contains 'image/'",
-                    'pageSize' => 500,
-                    'fields' => 'nextPageToken,files(id,name,mimeType,size,modifiedTime,parents,webViewLink)',
-                ];
-
-                if ($pageToken) {
-                    $options['pageToken'] = $pageToken;
-                }
-
-                $response = $driveService->getDrive()->files->listFiles($options);
-                $files = collect($response->getFiles());
-                $pageToken = $response->getNextPageToken();
-
-                foreach ($files as $file) {
-                    $existe = Foto::where('google_drive_file_id', $file->getId())->exists();
-
-                    if (!$existe) {
-                        Foto::create([
-                            'evento_id' => $importacion->evento_id,
-                            'importacion_id' => $importacion->id,
-                            'corredor_id' => $corredor?->id,
-                            'nombre_archivo' => $file->getName(),
-                            'google_drive_file_id' => $file->getId(),
-                            'google_drive_parent_id' => $file->getParents() ? $file->getParents()->first() : null,
-                            'mime_type' => $file->getMimeType(),
-                            'tamano_archivo' => $file->getSize() ?? 0,
-                            'url_visualizacion' => $file->getWebViewLink(),
-                            'estado' => FotoEstado::Disponible->value,
-                        ]);
-                    }
-
-                    $archivosProcesados++;
-                }
-            } catch (\Google\Service\Exception $e) {
-                $this->registrarError($importacion, $e);
-                throw $e;
-            } catch (\Exception $e) {
-                $this->registrarError($importacion, $e);
-                throw $e;
+        $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
+            $parents = $file->getParents() ?? [];
+            $parentId = null;
+            if (is_array($parents) && count($parents) > 0) {
+                $parentId = $parents[0];
+            } elseif ($parents instanceof \Google\Client\ArrayObject && $parents->count() > 0) {
+                $parentId = $parents->getIterator()->current();
             }
-        } while ($pageToken);
 
-        return $archivosProcesados;
+            $rows = [
+                'evento_id' => $importacion->evento_id,
+                'importacion_id' => $importacion->id,
+                'corredor_id' => $corredor?->id,
+                'dorsal' => $this->dorsal,
+                'nombre_archivo' => $file->getName(),
+                'google_drive_file_id' => $file->getId(),
+                'google_drive_parent_id' => $parentId,
+                'mime_type' => $file->getMimeType(),
+                'tamano_archivo' => $file->getSize() ?? 0,
+                'size' => $file->getSize() ?? 0,
+                'ruta_logica' => "{$importacion->evento_id}/{$this->dorsal}/{$file->getName()}",
+                'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($file->getId()),
+                'url_descarga' => null,
+                'estado' => FotoEstado::Disponible->value,
+                'fecha_modificacion' => $file->getModifiedTime(),
+                'metadata' => [
+                    'parents' => is_array($parents) ? $parents : iterator_to_array($parents->getIterator()),
+                    'folder_id' => $this->folderId,
+                    'synced_at' => now()->toIso8601String(),
+                ],
+            ];
+
+            Foto::query()->upsert(
+                [$rows],
+                ['google_drive_file_id'],
+                [
+                    'evento_id',
+                    'importacion_id',
+                    'corredor_id',
+                    'dorsal',
+                    'nombre_archivo',
+                    'google_drive_parent_id',
+                    'mime_type',
+                    'tamano_archivo',
+                    'size',
+                    'ruta_logica',
+                    'url_visualizacion',
+                    'url_descarga',
+                    'estado',
+                    'fecha_modificacion',
+                    'metadata',
+                ]
+            );
+
+            $processed++;
+        });
+
+        $importacion->increment('procesados', $processed);
+        $importacion->increment('procesados_folders');
+
+        $syncService->log($importacion, LogTipo::Info, "Dorsal {$this->dorsal} procesado", [
+            'folder_id' => $this->folderId,
+            'files' => $processed,
+        ]);
+
+        $syncService->completeIfFinished($importacion);
     }
 
-    protected function registrarError(Importacion $importacion, \Exception $e): void
+    public function failed(\Throwable $exception): void
     {
+        $importacion = Importacion::find($this->importacionId);
+
+        if (!$importacion) {
+            return;
+        }
+
         $importacion->increment('errores');
 
-        $importacion->logs()->create([
-            'tipo' => LogTipo::Error->value,
-            'mensaje' => "Error en dorsal {$this->dorsal}: {$e->getMessage()}",
-            'metadata' => ['folder_id' => $this->folderId],
-        ]);
-    }
-
-    protected function registrarLog(Importacion $importacion, LogTipo $tipo, string $mensaje): void
-    {
-        $importacion->logs()->create([
-            'tipo' => $tipo->value,
-            'mensaje' => $mensaje,
+        app(SyncService::class)->log($importacion, LogTipo::Error, "Error en dorsal {$this->dorsal}", [
+            'folder_id' => $this->folderId,
+            'error' => $exception->getMessage(),
         ]);
     }
 }

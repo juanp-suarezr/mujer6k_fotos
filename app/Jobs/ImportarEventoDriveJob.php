@@ -6,6 +6,7 @@ use App\Enums\ImportacionEstado;
 use App\Enums\LogTipo;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
+use App\Services\SyncService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,8 +18,10 @@ class ImportarEventoDriveJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-    public int $backoff = 5;
-    public int $maxExceptions = 5;
+
+    public array $backoff = [5, 15, 60];
+
+    public int $maxExceptions = 3;
 
     public function __construct(
         public int $eventoId,
@@ -26,7 +29,7 @@ class ImportarEventoDriveJob implements ShouldQueue
         public ?int $existingImportacionId = null
     ) {}
 
-    public function handle(GoogleDriveService $driveService): void
+    public function handle(GoogleDriveService $driveService, SyncService $syncService): void
     {
         $importacion = $this->existingImportacionId
             ? Importacion::findOrFail($this->existingImportacionId)
@@ -38,66 +41,66 @@ class ImportarEventoDriveJob implements ShouldQueue
                 'total_archivos' => 0,
                 'procesados' => 0,
                 'errores' => 0,
+                'total_folders' => 0,
+                'procesados_folders' => 0,
             ]);
 
-        $importacion->update(['estado' => ImportacionEstado::Procesando->value, 'fecha_inicio' => now()]);
-        $this->registrarLog($importacion, LogTipo::Info, "Iniciando importación del evento {$this->eventoId}");
+        $syncService->markStarted($importacion);
 
-        $pageToken = null;
-        $totalDorsales = 0;
+        $totalFolders = $this->dispatchDorsalJobs($driveService, $importacion);
+        $totalFiles = $driveService->countFiles($this->carpetaDriveId);
 
-        do {
-            try {
-                $options = ['pageSize' => 200, 'fields' => 'nextPageToken,files(id,name)'];
-
-                if ($pageToken) {
-                    $options['pageToken'] = $pageToken;
-                }
-
-                $response = $driveService->getDrive()->files->listFiles($options);
-                $subfolders = collect($response->getFiles());
-                $pageToken = $response->getNextPageToken();
-
-                foreach ($subfolders as $subfolder) {
-                    ProcesarDorsalDriveJob::dispatch(
-                        $importacion->id,
-                        $subfolder->getId(),
-                        $subfolder->getName(),
-                        $driveService
-                    )->delay(now()->addSeconds(2));
-
-                    $totalDorsales++;
-                }
-            } catch (\Google\Service\Exception $e) {
-                if (!$this->handleGoogleApiException($e)) {
-                    throw $e;
-                }
-            }
-        } while ($pageToken);
-
-        $importacion->update(['total_archivos' => $totalDorsales * 100]);
-        $this->registrarLog($importacion, LogTipo::Info, "Importación iniciada: {$totalDorsales} dorsales por procesar");
-    }
-
-    protected function handleGoogleApiException(\Google\Service\Exception $e): bool
-    {
-        $code = $e->getCode();
-
-        if ($code === 429) {
-            $this->backoff = min($this->backoff * 2, 300);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function registrarLog(Importacion $importacion, LogTipo $tipo, string $mensaje, array $metadata = []): void
-    {
-        $importacion->logs()->create([
-            'tipo' => $tipo->value,
-            'mensaje' => $mensaje,
-            'metadata' => $metadata,
+        $importacion->update([
+            'total_folders' => $totalFolders,
+            'procesados_folders' => 0,
+            'total_archivos' => $totalFiles,
         ]);
+
+        $syncService->log($importacion, LogTipo::Info, 'Importación iniciada', [
+            'folders' => $totalFolders,
+            'files' => $totalFiles,
+        ]);
+
+        if ($totalFolders === 0) {
+            $syncService->complete($importacion, [
+                'folders_processed' => 0,
+                'files_processed' => 0,
+            ]);
+        }
+    }
+
+    protected function dispatchDorsalJobs(GoogleDriveService $driveService, Importacion $importacion): int
+    {
+        $totalFolders = 0;
+
+        $driveService->paginateFolders($this->carpetaDriveId, [], function ($folder) use (&$totalFolders, $importacion): void {
+            $dorsal = trim((string) $folder->getName());
+
+            if (!preg_match('/^\d+$/', $dorsal)) {
+                app(SyncService::class)->log($importacion, LogTipo::Warning, 'Carpeta omitida: no representa un dorsal', [
+                    'folder_id' => $folder->getId(),
+                    'folder_name' => $folder->getName(),
+                ]);
+
+                return;
+            }
+
+            $totalFolders++;
+
+            SyncDorsalJob::dispatch($importacion->id, $folder->getId(), $dorsal);
+        });
+
+        return $totalFolders;
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        $importacion = Importacion::find($this->existingImportacionId ?? Importacion::where('evento_id', $this->eventoId)
+            ->where('carpeta_drive_id', $this->carpetaDriveId)
+            ->latest()->first()?->id);
+
+        if ($importacion) {
+            app(SyncService::class)->fail($importacion, $exception);
+        }
     }
 }

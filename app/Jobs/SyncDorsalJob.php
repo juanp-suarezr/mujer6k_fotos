@@ -42,6 +42,13 @@ class SyncDorsalJob implements ShouldQueue
 
         $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
             $parents = $file->getParents() ?? [];
+            $parentId = null;
+            if (is_array($parents) && count($parents) > 0) {
+                $parentId = $parents[0];
+            } elseif ($parents instanceof \Google\Client\ArrayObject && $parents->count() > 0) {
+                $parentId = $parents->getIterator()->current();
+            }
+
             $rows = [
                 'evento_id' => $importacion->evento_id,
                 'importacion_id' => $importacion->id,
@@ -49,7 +56,7 @@ class SyncDorsalJob implements ShouldQueue
                 'dorsal' => $this->dorsal,
                 'nombre_archivo' => $file->getName(),
                 'google_drive_file_id' => $file->getId(),
-                'google_drive_parent_id' => $parents[0] ?? null,
+                'google_drive_parent_id' => $parentId,
                 'mime_type' => $file->getMimeType(),
                 'tamano_archivo' => $file->getSize() ?? 0,
                 'size' => $file->getSize() ?? 0,
@@ -58,11 +65,11 @@ class SyncDorsalJob implements ShouldQueue
                 'url_descarga' => null,
                 'estado' => FotoEstado::Disponible->value,
                 'fecha_modificacion' => $file->getModifiedTime(),
-                'metadata' => json_encode([
-                    'parents' => $parents,
+                'metadata' => [
+                    'parents' => is_array($parents) ? $parents : iterator_to_array($parents->getIterator()),
                     'folder_id' => $this->folderId,
                     'synced_at' => now()->toIso8601String(),
-                ]),
+                ],
             ];
 
             Foto::query()->upsert(

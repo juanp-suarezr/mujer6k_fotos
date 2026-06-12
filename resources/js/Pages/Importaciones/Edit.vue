@@ -47,14 +47,17 @@
       <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="p-4 border-b border-gray-100 flex justify-between items-center">
           <h3 class="text-lg font-semibold text-gray-800">Fotos Indexadas ({{ fotos_count || importacion.fotos?.length || 0 }})</h3>
-          <button
-            v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
-            @click="syncImportacion"
-            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            <ArrowPathIcon class="h-4 w-4 mr-2" />
-            Sincronizar
-          </button>
+          <div class="flex items-center space-x-2">
+            <span v-if="pollStatus" class="text-xs text-gray-500">Actualizando...</span>
+            <button
+              v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
+              @click="syncImportacion"
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              <ArrowPathIcon class="h-4 w-4 mr-2" />
+              Sincronizar
+            </button>
+          </div>
         </div>
         <div class="p-6">
           <div v-if="importacion.fotos?.length" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -63,7 +66,7 @@
                 <PhotoIcon class="h-8 w-8 text-gray-400" />
               </div>
               <p class="text-xs font-medium text-gray-800 truncate">{{ foto.nombre_archivo }}</p>
-              <p class="text-[10px] text-gray-500">Dorsal: {{ foto.corredor?.dorsal || '—' }}</p>
+              <p class="text-[10px] text-gray-500">Dorsal: {{ foto.dorsal || '—' }}</p>
             </div>
           </div>
           <p v-else class="text-center text-gray-400 py-8">No hay fotos indexadas</p>
@@ -118,12 +121,50 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ArrowPathIcon, PhotoIcon, TrashIcon } from '@heroicons/vue/24/solid';
+import { ref, watch, onUnmounted } from 'vue';
 
 const props = defineProps({
   importacion: { type: Object, required: true },
   fotos: { type: Array, required: true },
   fotos_count: { type: Number, required: true },
   progress: { type: Object, required: true },
+});
+
+const pollStatus = ref(false);
+let pollInterval = null;
+
+const fetchProgress = () => {
+  pollStatus.value = true;
+  router.get(
+    route('importaciones.progress', props.importacion.id),
+    {},
+    {
+      preserveScroll: true,
+      preserveState: true,
+      only: ['importacion'],
+      onSuccess: () => {
+        pollStatus.value = false;
+      },
+      onError: () => {
+        pollStatus.value = false;
+      },
+    }
+  );
+};
+
+watch(() => props.importacion.estado, (estado) => {
+  if (estado === 'procesando' && !pollInterval) {
+    pollInterval = setInterval(fetchProgress, 3000);
+  } else if (pollInterval && (estado === 'completada' || estado === 'fallida')) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+  }
 });
 
 const formatDate = (date) => {

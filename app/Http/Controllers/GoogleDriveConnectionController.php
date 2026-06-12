@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GoogleConnectionStatus;
 use App\Models\GoogleConnection;
 use App\Services\GoogleClient;
 use App\Services\SyncService;
@@ -91,7 +92,7 @@ class GoogleDriveConnectionController extends Controller
             $client->forConnection($connection);
             $client->getDrive()->about->get(['fields' => 'user']);
 
-            $connection->status = 'connected';
+            $connection->status = GoogleConnectionStatus::Conectado;
             $connection->last_validated_at = now();
             $connection->last_error = null;
             $connection->save();
@@ -102,7 +103,7 @@ class GoogleDriveConnectionController extends Controller
                 'email_google' => $connection->email_google,
             ]);
         } catch (\Throwable $exception) {
-            $connection->status = 'invalid';
+            $connection->status = GoogleConnectionStatus::Invalido;
             $connection->last_error = $exception->getMessage();
             $connection->save();
 
@@ -124,7 +125,7 @@ class GoogleDriveConnectionController extends Controller
 
         return response()->json([
             'connected' => false,
-            'status' => 'disconnected',
+            'status' => GoogleConnectionStatus::Desconectado->value,
         ]);
     }
 }
