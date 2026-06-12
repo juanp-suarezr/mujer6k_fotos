@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ImportacionEstado;
-use App\Jobs\ImportarFotosJob;
+use App\Jobs\ImportarEventoDriveJob;
 use App\Models\Evento;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
@@ -49,11 +49,9 @@ class DriveBrowserController extends Controller
             'origen' => 'drive',
             'carpeta_drive_id' => $request->folder_id,
             'estado' => ImportacionEstado::Pendiente->value,
-            'total_archivos' => 0,
-            'procesados' => 0,
         ]);
 
-        ImportarFotosJob::dispatch($importacion, $this->driveService);
+        ImportarEventoDriveJob::dispatch($evento->id, $request->folder_id, $importacion->id);
 
         return redirect()->route('importaciones.edit', $importacion->id);
     }

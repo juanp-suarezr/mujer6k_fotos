@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\ImportacionService;
+use App\Jobs\ImportarEventoDriveJob;
 use App\Models\Evento;
 use App\Models\Importacion;
 use App\Http\Requests\ImportacionRequest;
@@ -57,8 +57,7 @@ class ImportacionController extends Controller
 
     function sync(Importacion $importacion)
     {
-        $service = new ImportacionService(app('App\Services\GoogleDriveService'));
-        $service->sincronizar($importacion);
+        ImportarEventoDriveJob::dispatch($importacion->evento_id, $importacion->carpeta_drive_id, $importacion->id);
 
         return redirect()->route('importaciones.edit', $importacion->id)
             ->with('success', 'Sincronización iniciada');

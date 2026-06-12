@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
+use App\Contracts\StorageDrive;
 use Google\Service\Drive as DriveService;
 use Illuminate\Support\Collection;
 
-class GoogleDriveService
+class GoogleDriveService implements StorageDrive
 {
     protected DriveService $drive;
 
@@ -91,5 +92,15 @@ class GoogleDriveService
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public function getDownloadUrl(string $fileId): ?string
+    {
+        return $this->getFileDownloadUrl($fileId);
+    }
+
+    public function getDrive(): DriveService
+    {
+        return $this->drive;
     }
 }

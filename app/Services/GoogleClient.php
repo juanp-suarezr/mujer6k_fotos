@@ -24,7 +24,8 @@ class GoogleClient
         if (file_exists($credentialsPath)) {
             $this->client->setAuthConfig($credentialsPath);
             $this->client->setScopes(Drive::DRIVE_READONLY);
-            $this->client->useApplicationDefaultCredentials();
+            $this->client->setAccessType('offline');
+            $this->client->setSubject(env('GOOGLE_DRIVE_IMPERSONATE_EMAIL'));
         }
     }
 

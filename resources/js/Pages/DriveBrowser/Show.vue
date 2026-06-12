@@ -1,0 +1,62 @@
+<template>
+  <AuthenticatedLayout>
+    <template #header>
+      <div class="flex items-center justify-between">
+        <h2 class="text-3xl font-bold text-gray-800">Contenido Carpeta</h2>
+        <div class="flex gap-2">
+          <Link :href="route('eventos.index')" class="text-sm text-gray-600 hover:text-gray-900">
+            Eventos
+          </Link>
+        </div>
+      </div>
+    </template>
+
+    <div class="py-6 space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            v-for="folder in folders"
+            :key="folder.id"
+            class="border border-gray-200 rounded-lg p-4 hover:bg-blue-50 cursor-pointer transition"
+          >
+            <Link
+              :href="route('drive-browser.show', folder.id)"
+              class="flex items-center"
+            >
+              <FolderIcon class="h-6 w-6 text-blue-600 mr-2" />
+              <span class="font-medium text-gray-800">{{ folder.name }}</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Fotografías ({{ files?.length || 0 }})</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div v-for="file in files" :key="file.id" class="border border-gray-200 rounded-lg p-2">
+            <div class="aspect-square bg-gray-100 rounded mb-2 flex items-center justify-center">
+              <PhotoIcon class="h-8 w-8 text-gray-400" />
+            </div>
+            <p class="text-xs font-medium text-gray-800 truncate">{{ file.name }}</p>
+          </div>
+        </div>
+
+        <div v-if="!files?.length" class="text-center py-8 text-gray-400">
+          <p class="text-sm">No hay fotografías en esta carpeta</p>
+        </div>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>
+
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Link } from '@inertiajs/vue3';
+import { FolderIcon, PhotoIcon } from '@heroicons/vue/24/solid';
+
+const props = defineProps({
+  folderId: { type: String, required: true },
+  folders: { type: Array, default: () => [] },
+  files: { type: Array, default: () => [] },
+});
+</script>
