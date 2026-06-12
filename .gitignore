@@ -6,6 +6,7 @@
 /vendor
 prot.json
 .prot.json
+client_secret.prot
 .env
 .env.backup
 .env.production
