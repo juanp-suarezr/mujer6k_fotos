@@ -134,6 +134,7 @@ const form = useForm({
   google_connection_id: '',
   carpeta_drive_id: '',
   origen: 'drive',
+  estado: 'pendiente',
   zip_file_path: '',
 });
 

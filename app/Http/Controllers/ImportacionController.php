@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ImportacionEstado;
 use App\Http\Requests\ImportacionRequest;
 use App\Models\Evento;
 use App\Models\GoogleConnection;
@@ -36,7 +37,10 @@ class ImportacionController extends Controller
 
     function store(ImportacionRequest $request)
     {
-        $importacion = Importacion::create($request->validated());
+        $data = $request->validated();
+        $data['estado'] = $data['estado'] ?? ImportacionEstado::Pendiente->value;
+
+        $importacion = Importacion::create($data);
 
         return redirect()->route('importaciones.edit', $importacion->id);
     }
