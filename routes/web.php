@@ -4,6 +4,7 @@ use App\Http\Controllers\EventoController;
 use App\Http\Controllers\CorredorController;
 use App\Http\Controllers\FotoController;
 use App\Http\Controllers\ImportacionController;
+use App\Http\Controllers\DriveBrowserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -68,6 +69,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('corredores', CorredorController::class);
     Route::resource('fotos', FotoController::class);
     Route::resource('importaciones', ImportacionController::class);
+
+    Route::post('importaciones/{importacion}/sync', [ImportacionController::class, 'sync'])->name('importaciones.sync');
+
+    Route::get('drive-browser', [DriveBrowserController::class, 'index'])->name('drive-browser.index');
+    Route::get('drive-browser/{folderId}', [DriveBrowserController::class, 'show'])->name('drive-browser.show');
+    Route::post('drive-browser/import/{evento}', [DriveBrowserController::class, 'import'])->name('drive-browser.import');
 });
 
 require __DIR__ . '/auth.php';

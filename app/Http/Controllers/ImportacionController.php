@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ImportacionService;
 use App\Models\Evento;
 use App\Models\Importacion;
 use App\Http\Requests\ImportacionRequest;
@@ -13,7 +14,7 @@ class ImportacionController extends Controller
     {
         $this->middleware('permission:importaciones-listar|importaciones-crear|importaciones-editar|importaciones-eliminar', ['only' => ['index', 'store']]);
         $this->middleware('permission:importaciones-crear', ['only' => ['create', 'store']]);
-        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update', 'sync']]);
         $this->middleware('permission:importaciones-eliminar', ['only' => ['destroy']]);
     }
 
@@ -33,15 +34,15 @@ class ImportacionController extends Controller
 
     function store(ImportacionRequest $request)
     {
-        Importacion::create($request->validated());
+        $importacion = Importacion::create($request->validated());
 
-        return to_route('importaciones.index');
+        return redirect()->route('importaciones.edit', $importacion->id);
     }
 
     function edit(Importacion $importacion)
     {
         return Inertia::render('Importaciones/Edit', [
-            'importacion' => $importacion->load('evento'),
+            'importacion' => $importacion->load(['evento', 'logs', 'fotos']),
             'eventos' => Evento::all(),
         ]);
     }
@@ -52,6 +53,15 @@ class ImportacionController extends Controller
 
         return redirect()->route('importaciones.edit', $importacion->id)
             ->with('success', 'Importación actualizada correctamente');
+    }
+
+    function sync(Importacion $importacion)
+    {
+        $service = new ImportacionService(app('App\Services\GoogleDriveService'));
+        $service->sincronizar($importacion);
+
+        return redirect()->route('importaciones.edit', $importacion->id)
+            ->with('success', 'Sincronización iniciada');
     }
 
     function destroy(Importacion $importacion)
