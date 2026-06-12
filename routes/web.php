@@ -74,10 +74,15 @@ Route::middleware('auth')->group(function () {
     Route::get('importaciones/{importacion}/progress', [ImportacionController::class, 'progress'])->name('importaciones.progress');
 
     Route::prefix('google-drive')->name('google-drive.')->group(function () {
+        Route::get('/', function () {
+            $connection = \App\Models\GoogleConnection::latest('id')->first();
+            $eventos = \App\Models\Evento::all();
+            return Inertia::render('GoogleDrive/Index', compact('connection', 'eventos'));
+        })->name('index');
         Route::get('connect', [GoogleDriveConnectionController::class, 'connect'])->name('connect');
         Route::get('callback', [GoogleDriveConnectionController::class, 'callback'])->name('callback');
         Route::get('status', [GoogleDriveConnectionController::class, 'status'])->name('status');
-        Route::get('validate', [GoogleDriveConnectionController::class, 'validateConnection'])->name('validate');
+        Route::post('validate', [GoogleDriveConnectionController::class, 'validateConnection'])->name('validate');
         Route::post('disconnect', [GoogleDriveConnectionController::class, 'disconnect'])->name('disconnect');
     });
 

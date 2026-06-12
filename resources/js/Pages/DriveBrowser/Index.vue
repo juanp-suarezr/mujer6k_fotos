@@ -7,7 +7,7 @@
     </template>
 
     <div class="py-6">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div v-if="folder" class="mb-4">
           <p class="text-sm text-gray-500">Carpeta raíz:</p>
           <p class="font-medium text-gray-900">{{ folder?.name || folderId }}</p>
@@ -26,7 +26,7 @@
               <FolderIcon class="h-8 w-8 text-blue-600 mr-3" />
               <div>
                 <p class="font-medium text-gray-800">{{ subfolder.name }}</p>
-                <p class="text-xs text-gray-500">Dorsal</p>
+                <p class="text-xs text-gray-500">Carpeta</p>
               </div>
             </Link>
           </div>
@@ -48,7 +48,7 @@
 
         <div v-if="!folders?.length && !files?.length" class="text-center py-12 text-gray-400">
           <FolderIcon class="h-12 w-12 mx-auto mb-3 opacity-50" />
-          <p class="text-sm">Carpeta vacía o sin acceso</p>
+          <p class="text-sm">Carpeta vacía o sin acceso. Configura las credenciales de Google Drive.</p>
         </div>
       </div>
     </div>

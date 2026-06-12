@@ -3,9 +3,15 @@
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-3xl font-bold text-gray-800">Importaciones</h2>
-        <PrimaryLink :href="route('importaciones.create')" class="text-sm">
-          Nueva Importación
-        </PrimaryLink>
+        <div class="flex items-center gap-2">
+          <Link :href="route('google-drive.index')" class="text-sm text-gray-600 hover:text-gray-900 flex items-center">
+            <FolderIcon class="h-4 w-4 mr-1" />
+            Google Drive
+          </Link>
+          <PrimaryLink :href="route('importaciones.create')" class="text-sm">
+            Nueva Importación
+          </PrimaryLink>
+        </div>
       </div>
     </template>
 
@@ -114,7 +120,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryLink from '@/Components/PrimaryLink.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowPathIcon, EyeIcon, DocumentIcon } from '@heroicons/vue/24/solid';
+import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   importaciones: { type: Object, required: true },

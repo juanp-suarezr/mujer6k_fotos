@@ -21,10 +21,14 @@ class DriveBrowserController extends Controller
     {
         $folderId = config('services.google.drive.folder_id');
         $eventosFolder = $this->driveService->getFolder($folderId);
+        $folders = $this->driveService->listFolders($folderId);
+        $files = $this->driveService->listFiles($folderId);
 
         return Inertia::render('DriveBrowser/Index', [
             'folderId' => $folderId,
             'folder' => $eventosFolder,
+            'folders' => $folders,
+            'files' => $files,
         ]);
     }
 
@@ -37,6 +41,7 @@ class DriveBrowserController extends Controller
             'folderId' => $folderId,
             'folders' => $folders,
             'files' => $files,
+            'eventos' => Evento::all(),
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportacionRequest;
 use App\Models\Evento;
+use App\Models\GoogleConnection;
 use App\Models\Importacion;
 use App\Services\SyncService;
 use Inertia\Inertia;
@@ -29,6 +30,7 @@ class ImportacionController extends Controller
     {
         return Inertia::render('Importaciones/Add', [
             'eventos' => Evento::all(),
+            'googleConnections' => GoogleConnection::all(),
         ]);
     }
 
@@ -42,8 +44,9 @@ class ImportacionController extends Controller
     function edit(Importacion $importacion)
     {
         return Inertia::render('Importaciones/Edit', [
-            'importacion' => $importacion->load(['evento', 'logs']),
+            'importacion' => $importacion->load(['evento', 'logs', 'googleConnection']),
             'eventos' => Evento::all(),
+            'googleConnections' => GoogleConnection::all(),
             'progress' => $this->syncService->progress($importacion),
             'fotos' => $importacion->fotos()->orderByDesc('id')->limit(100)->get(),
             'fotos_count' => $importacion->fotos()->count(),

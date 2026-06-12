@@ -39,7 +39,7 @@ const MyPreset = definePreset(Aura, {
     },
 });
 
-const appName = "Registro capacitaciones";
+const appName = "Mujer Valiente 6K";
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
