@@ -11,6 +11,7 @@
                         <slot name="header" />
                     </h3>
 
+                    <flash-messages />
                     <slot />
                 </div>
             </main>
@@ -21,4 +22,5 @@
 <script setup>
 import Header from '@/Layouts/Header.vue';
 import Navigation from '@/Layouts/Navigation.vue';
+import FlashMessages from '@/Components/FlashMessages.vue';
 </script>

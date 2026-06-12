@@ -11,10 +11,6 @@
     </template>
 
     <div class="py-6">
-      <div v-if="$page.props.flash?.success" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-        {{ $page.props.flash.success }}
-      </div>
-
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-gray-600">

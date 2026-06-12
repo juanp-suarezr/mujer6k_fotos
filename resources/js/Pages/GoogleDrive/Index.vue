@@ -79,10 +79,10 @@
           <div v-else class="text-center py-12">
             <FolderIcon class="h-16 w-16 mx-auto text-gray-300 mb-4" />
             <p class="text-gray-500 mb-4">No hay conexiones configuradas</p>
-            <Link :href="route('google-drive.connect')" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center">
-              <ArrowUpOnSquareIcon class="h-4 w-4 mr-1" />
-              Conectar Google Drive
-            </Link>
+<a :href="route('google-drive.connect')" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center justify-center">
+               <ArrowUpOnSquareIcon class="h-4 w-4 mr-1" />
+               Conectar Google Drive
+             </a>
           </div>
         </div>
       </div>
@@ -169,16 +169,20 @@ const formatExpiry = (date) => {
 };
 
 const connect = () => {
-  router.get(route('google-drive.connect'));
+  window.location.href = route('google-drive.connect');
 };
 
 const validateConnection = () => {
-  router.post(route('google-drive.validate'));
+  router.post(route('google-drive.validate'), {}, {
+    onSuccess: () => router.reload(),
+  });
 };
 
 const disconnect = () => {
   if (confirm('¿Desconectar la cuenta de Google Drive?')) {
-    router.post(route('google-drive.disconnect'));
+    router.post(route('google-drive.disconnect'), {}, {
+      onSuccess: () => router.reload(),
+    });
   }
 };
 
