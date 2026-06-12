@@ -22,6 +22,10 @@
             </nav-link>
 
             <SeparadorMenu>Recursos</SeparadorMenu>
+            <nav-link :href="route('importaciones.index')" :active="route().current().includes('importaciones')">
+                <ArrowDownTrayIcon class="h-6 w-6 text-white" />
+                <span class="mx-3">Importaciones</span>
+            </nav-link>
             <nav-link :href="route('corredores.index')" :active="route().current().includes('corredores')">
                 <UserGroupIcon class="h-6 w-6 text-white" />
                 <span class="mx-3">Corredores</span>
@@ -49,7 +53,7 @@ import NavLink from '@/Components/NavLink.vue';
 import SeparadorMenu from "@/Components/SeparadorMenu.vue";
 import imglogo_w from '/public/assets/img/logo_white.webp'
 import { ref } from 'vue'
-import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon, UsersIcon, KeyIcon } from '@heroicons/vue/24/solid'
+import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon, UsersIcon, KeyIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/solid'
 
 export default {
     components: {
@@ -61,6 +65,7 @@ export default {
         CalendarIcon,
         CameraIcon,
         KeyIcon,
+        ArrowDownTrayIcon,
     },
 
     setup() {
