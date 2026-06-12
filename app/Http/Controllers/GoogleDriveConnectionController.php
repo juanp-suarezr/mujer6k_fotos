@@ -17,7 +17,7 @@ class GoogleDriveConnectionController extends Controller
         $this->middleware(['auth', 'role_or_permission:admin|google-drive-conectar'])->only([
             'connect',
             'disconnect',
-            'validate',
+            'validateConnection',
             'status',
         ]);
     }
@@ -80,7 +80,7 @@ class GoogleDriveConnectionController extends Controller
         ]);
     }
 
-    public function validate(GoogleClient $client)
+    public function validateConnection(GoogleClient $client)
     {
         $connection = GoogleConnection::latest('id')->first();
 

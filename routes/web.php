@@ -77,7 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::get('connect', [GoogleDriveConnectionController::class, 'connect'])->name('connect');
         Route::get('callback', [GoogleDriveConnectionController::class, 'callback'])->name('callback');
         Route::get('status', [GoogleDriveConnectionController::class, 'status'])->name('status');
-        Route::get('validate', [GoogleDriveConnectionController::class, 'validate'])->name('validate');
+        Route::get('validate', [GoogleDriveConnectionController::class, 'validateConnection'])->name('validate');
         Route::post('disconnect', [GoogleDriveConnectionController::class, 'disconnect'])->name('disconnect');
     });
 
