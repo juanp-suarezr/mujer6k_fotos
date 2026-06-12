@@ -16,6 +16,7 @@ class PermissionTableSeeder extends Seeder
             'eventos-listar', 'eventos-crear', 'eventos-editar', 'eventos-eliminar',
             'corredores-listar', 'corredores-crear', 'corredores-editar', 'corredores-eliminar',
             'fotos-listar', 'fotos-crear', 'fotos-editar', 'fotos-eliminar',
+            'importaciones-listar', 'importaciones-crear', 'importaciones-editar', 'importaciones-eliminar',
         ];
 
         foreach ($permissions as $permission) {

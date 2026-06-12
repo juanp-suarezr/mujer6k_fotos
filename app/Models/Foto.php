@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FotoEstado;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,16 +12,23 @@ class Foto extends Model
 
     protected $fillable = [
         'evento_id',
+        'importacion_id',
         'corredor_id',
         'nombre_archivo',
-        'ruta_storage',
-        'url_publica',
+        'google_drive_file_id',
+        'google_drive_parent_id',
+        'mime_type',
+        'tamano_archivo',
+        'url_visualizacion',
+        'url_descarga',
         'estado',
         'metadata',
     ];
 
     protected $casts = [
         'metadata' => 'array',
+        'estado' => FotoEstado::class,
+        'tamano_archivo' => 'integer',
     ];
 
     public function evento()
@@ -31,5 +39,10 @@ class Foto extends Model
     public function corredor()
     {
         return $this->belongsTo(Corredor::class, 'corredor_id');
+    }
+
+    public function importacion()
+    {
+        return $this->belongsTo(Importacion::class, 'importacion_id');
     }
 }

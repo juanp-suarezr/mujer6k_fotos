@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\EventoEstado;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EventoRequest extends FormRequest
 {
@@ -17,7 +19,7 @@ class EventoRequest extends FormRequest
             'nombre' => ['required', 'string', 'max:255'],
             'descripcion' => ['nullable', 'string'],
             'fecha_evento' => ['nullable', 'date'],
-            'estado' => ['required', 'string', 'max:20', 'in:activo,finalizado,cancelado'],
+            'estado' => ['required', 'string', 'max:20', Rule::in(array_column(EventoEstado::cases(), 'value'))],
         ];
     }
 }

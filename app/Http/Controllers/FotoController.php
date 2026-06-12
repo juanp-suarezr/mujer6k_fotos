@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Evento;
 use App\Models\Corredor;
 use App\Models\Foto;
+use App\Models\Importacion;
 use App\Http\Requests\FotoRequest;
 use Inertia\Inertia;
 
@@ -21,7 +22,7 @@ class FotoController extends Controller
     function index()
     {
         return Inertia::render('Fotos/Index', [
-            'fotos' => Foto::with(['evento', 'corredor'])->paginate(10)->withQueryString(),
+            'fotos' => Foto::with(['evento', 'corredor', 'importacion'])->paginate(10)->withQueryString(),
         ]);
     }
 
@@ -30,6 +31,7 @@ class FotoController extends Controller
         return Inertia::render('Fotos/Add', [
             'eventos' => Evento::all(),
             'corredores' => Corredor::all(),
+            'importaciones' => Importacion::all(),
         ]);
     }
 
@@ -43,9 +45,10 @@ class FotoController extends Controller
     function edit(Foto $foto)
     {
         return Inertia::render('Fotos/Edit', [
-            'foto' => $foto->load(['evento', 'corredor']),
+            'foto' => $foto->load(['evento', 'corredor', 'importacion']),
             'eventos' => Evento::all(),
             'corredores' => Corredor::all(),
+            'importaciones' => Importacion::all(),
         ]);
     }
 

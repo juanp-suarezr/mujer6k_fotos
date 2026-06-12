@@ -1,0 +1,28 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('logs_importacion', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('importacion_id')->constrained('importaciones')->cascadeOnDelete();
+            $table->string('tipo')->comment('Tipo de log: info, error, warning');
+            $table->text('mensaje');
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+
+            $table->index('importacion_id');
+            $table->index('tipo');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('logs_importacion');
+    }
+};

@@ -15,11 +15,16 @@ class FotoRequest extends FormRequest
     {
         return [
             'evento_id' => ['required', 'integer', 'exists:eventos,id'],
-            'corredor_id' => ['required', 'integer', 'exists:corredores,id'],
+            'importacion_id' => ['nullable', 'integer', 'exists:importaciones,id'],
+            'corredor_id' => ['nullable', 'integer', 'exists:corredores,id'],
             'nombre_archivo' => ['required', 'string', 'max:255'],
-            'ruta_storage' => ['required', 'string', 'max:500'],
-            'url_publica' => ['nullable', 'url', 'max:2048'],
-            'estado' => ['required', 'string', 'max:20', 'in:pendiente,procesada,rechazada'],
+            'google_drive_file_id' => ['required', 'string', 'max:255', 'unique:fotos,google_drive_file_id'],
+            'google_drive_parent_id' => ['nullable', 'string', 'max:255'],
+            'mime_type' => ['required', 'string', 'max:100'],
+            'tamano_archivo' => ['nullable', 'integer', 'min:0'],
+            'url_visualizacion' => ['nullable', 'url', 'max:2048'],
+            'url_descarga' => ['nullable', 'url', 'max:2048'],
+            'estado' => ['required', 'string', 'max:20', 'in:pendiente,disponible,error'],
             'metadata' => ['nullable', 'array'],
         ];
     }
