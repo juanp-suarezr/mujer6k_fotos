@@ -46,7 +46,7 @@
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-100">
         <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-          <h3 class="text-lg font-semibold text-gray-800">Fotos Indexadas ({{ importacion.fotos?.length || 0 }})</h3>
+          <h3 class="text-lg font-semibold text-gray-800">Fotos Indexadas ({{ fotos_count || importacion.fotos?.length || 0 }})</h3>
           <button
             v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
             @click="syncImportacion"
@@ -58,7 +58,7 @@
         </div>
         <div class="p-6">
           <div v-if="importacion.fotos?.length" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div v-for="foto in importacion.fotos" :key="foto.id" class="border border-gray-200 rounded-lg p-2">
+            <div v-for="foto in fotos" :key="foto.id" class="border border-gray-200 rounded-lg p-2">
               <div class="aspect-square bg-gray-100 rounded mb-2 flex items-center justify-center">
                 <PhotoIcon class="h-8 w-8 text-gray-400" />
               </div>
@@ -121,6 +121,9 @@ import { ArrowPathIcon, PhotoIcon, TrashIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   importacion: { type: Object, required: true },
+  fotos: { type: Array, required: true },
+  fotos_count: { type: Number, required: true },
+  progress: { type: Object, required: true },
 });
 
 const formatDate = (date) => {

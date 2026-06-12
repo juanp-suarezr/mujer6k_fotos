@@ -14,13 +14,17 @@ class Foto extends Model
         'evento_id',
         'importacion_id',
         'corredor_id',
+        'dorsal',
         'nombre_archivo',
         'google_drive_file_id',
         'google_drive_parent_id',
         'mime_type',
         'tamano_archivo',
+        'size',
+        'ruta_logica',
         'url_visualizacion',
         'url_descarga',
+        'fecha_modificacion',
         'estado',
         'metadata',
     ];
@@ -29,6 +33,8 @@ class Foto extends Model
         'metadata' => 'array',
         'estado' => FotoEstado::class,
         'tamano_archivo' => 'integer',
+        'size' => 'integer',
+        'fecha_modificacion' => 'datetime',
     ];
 
     public function evento()

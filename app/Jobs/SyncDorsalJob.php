@@ -1,0 +1,124 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Enums\FotoEstado;
+use App\Enums\LogTipo;
+use App\Models\Corredor;
+use App\Models\Foto;
+use App\Models\Importacion;
+use App\Services\GoogleDriveService;
+use App\Services\SyncService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+
+class SyncDorsalJob implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $tries = 5;
+
+    public array $backoff = [10, 30, 120, 300];
+
+    public int $maxExceptions = 5;
+
+    public function __construct(
+        public int $importacionId,
+        public string $folderId,
+        public string $dorsal
+    ) {}
+
+    public function handle(GoogleDriveService $driveService, SyncService $syncService): void
+    {
+        $importacion = Importacion::findOrFail($this->importacionId);
+        $corredor = Corredor::where('evento_id', $importacion->evento_id)
+            ->where('dorsal', $this->dorsal)
+            ->first();
+
+        $processed = 0;
+
+        $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
+            $parents = $file->getParents() ?? [];
+            $rows = [
+                'evento_id' => $importacion->evento_id,
+                'importacion_id' => $importacion->id,
+                'corredor_id' => $corredor?->id,
+                'dorsal' => $this->dorsal,
+                'nombre_archivo' => $file->getName(),
+                'google_drive_file_id' => $file->getId(),
+                'google_drive_parent_id' => $parents[0] ?? null,
+                'mime_type' => $file->getMimeType(),
+                'tamano_archivo' => $file->getSize() ?? 0,
+                'size' => $file->getSize() ?? 0,
+                'ruta_logica' => $this->rutaLogica($importacion->evento_id, $this->dorsal, $file->getName()),
+                'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($file->getId()),
+                'url_descarga' => null,
+                'estado' => FotoEstado::Disponible->value,
+                'fecha_modificacion' => $file->getModifiedTime(),
+                'metadata' => json_encode([
+                    'parents' => $parents,
+                    'folder_id' => $this->folderId,
+                    'synced_at' => now()->toIso8601String(),
+                ]),
+            ];
+
+            Foto::query()->upsert(
+                [$rows],
+                ['google_drive_file_id'],
+                [
+                    'evento_id',
+                    'importacion_id',
+                    'corredor_id',
+                    'dorsal',
+                    'nombre_archivo',
+                    'google_drive_parent_id',
+                    'mime_type',
+                    'tamano_archivo',
+                    'size',
+                    'ruta_logica',
+                    'url_visualizacion',
+                    'url_descarga',
+                    'estado',
+                    'fecha_modificacion',
+                    'metadata',
+                ]
+            );
+
+            $processed++;
+        });
+
+        $importacion->increment('procesados', $processed);
+        $importacion->increment('procesados_folders');
+
+        $syncService->log($importacion, LogTipo::Info, "Dorsal {$this->dorsal} procesado", [
+            'folder_id' => $this->folderId,
+            'files' => $processed,
+        ]);
+
+        $syncService->completeIfFinished($importacion);
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        $importacion = Importacion::find($this->importacionId);
+
+        if (!$importacion) {
+            return;
+        }
+
+        $importacion->increment('errores');
+
+        app(SyncService::class)->log($importacion, LogTipo::Error, "Error en dorsal {$this->dorsal}", [
+            'folder_id' => $this->folderId,
+            'error' => $exception->getMessage(),
+        ]);
+    }
+
+    protected function rutaLogica(int $eventoId, string $dorsal, string $fileName): string
+    {
+        return "{$eventoId}/{$dorsal}/{$fileName}";
+    }
+}

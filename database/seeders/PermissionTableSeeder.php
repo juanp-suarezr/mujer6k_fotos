@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Database\Seeder;
 
 class PermissionTableSeeder extends Seeder
 {
@@ -17,6 +16,7 @@ class PermissionTableSeeder extends Seeder
             'corredores-listar', 'corredores-crear', 'corredores-editar', 'corredores-eliminar',
             'fotos-listar', 'fotos-crear', 'fotos-editar', 'fotos-eliminar',
             'importaciones-listar', 'importaciones-crear', 'importaciones-editar', 'importaciones-eliminar',
+            'google-drive-conectar', 'google-drive-validar', 'google-drive-desconectar',
         ];
 
         foreach ($permissions as $permission) {

@@ -5,6 +5,7 @@ use App\Http\Controllers\CorredorController;
 use App\Http\Controllers\FotoController;
 use App\Http\Controllers\ImportacionController;
 use App\Http\Controllers\DriveBrowserController;
+use App\Http\Controllers\GoogleDriveConnectionController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -69,6 +70,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('corredores', CorredorController::class);
     Route::resource('fotos', FotoController::class);
     Route::resource('importaciones', ImportacionController::class);
+
+    Route::get('importaciones/{importacion}/progress', [ImportacionController::class, 'progress'])->name('importaciones.progress');
+
+    Route::prefix('google-drive')->name('google-drive.')->group(function () {
+        Route::get('connect', [GoogleDriveConnectionController::class, 'connect'])->name('connect');
+        Route::get('callback', [GoogleDriveConnectionController::class, 'callback'])->name('callback');
+        Route::get('status', [GoogleDriveConnectionController::class, 'status'])->name('status');
+        Route::get('validate', [GoogleDriveConnectionController::class, 'validate'])->name('validate');
+        Route::post('disconnect', [GoogleDriveConnectionController::class, 'disconnect'])->name('disconnect');
+    });
 
     Route::post('importaciones/{importacion}/sync', [ImportacionController::class, 'sync'])->name('importaciones.sync');
 

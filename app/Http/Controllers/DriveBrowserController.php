@@ -3,21 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ImportacionEstado;
-use App\Jobs\ImportarEventoDriveJob;
 use App\Models\Evento;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
+use App\Services\SyncService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DriveBrowserController extends Controller
 {
-    protected GoogleDriveService $driveService;
-
-    public function __construct()
-    {
-        $this->driveService = new GoogleDriveService();
-    }
+    public function __construct(
+        protected GoogleDriveService $driveService,
+        protected SyncService $syncService
+    ) {}
 
     public function index()
     {
@@ -44,14 +42,12 @@ class DriveBrowserController extends Controller
 
     public function import(Request $request, Evento $evento)
     {
-        $importacion = Importacion::create([
-            'evento_id' => $evento->id,
-            'origen' => 'drive',
-            'carpeta_drive_id' => $request->folder_id,
-            'estado' => ImportacionEstado::Pendiente->value,
-        ]);
+        $importacion = $this->syncService->createForEvento($evento, $request->input('folder_id'));
 
-        ImportarEventoDriveJob::dispatch($evento->id, $request->folder_id, $importacion->id);
+        $importacion->estado = ImportacionEstado::Pendiente->value;
+        $importacion->save();
+
+        $this->syncService->start($importacion);
 
         return redirect()->route('importaciones.edit', $importacion->id);
     }

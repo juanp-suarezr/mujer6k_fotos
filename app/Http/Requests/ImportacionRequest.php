@@ -15,14 +15,19 @@ class ImportacionRequest extends FormRequest
     {
         return [
             'evento_id' => 'required|exists:eventos,id',
+            'google_connection_id' => 'nullable|exists:google_connections,id',
             'origen' => 'required|string|max:255',
             'carpeta_drive_id' => 'nullable|string|max:255',
             'estado' => 'required|string|max:20',
             'total_archivos' => 'nullable|integer|min:0',
             'procesados' => 'nullable|integer|min:0',
             'errores' => 'nullable|integer|min:0',
+            'total_folders' => 'nullable|integer|min:0',
+            'procesados_folders' => 'nullable|integer|min:0',
             'fecha_inicio' => 'nullable|date',
             'fecha_fin' => 'nullable|date',
+            'last_error' => 'nullable|string',
+            'metadata' => 'nullable|array',
         ];
     }
 }

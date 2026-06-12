@@ -5,102 +5,165 @@ namespace App\Services;
 use App\Contracts\StorageDrive;
 use Google\Service\Drive as DriveService;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class GoogleDriveService implements StorageDrive
 {
-    protected DriveService $drive;
-
-    public function __construct(?GoogleClient $googleClient = null)
+    public function __construct(protected GoogleClient $googleClient)
     {
-        $this->drive = $googleClient ? $googleClient->getDrive() : (new GoogleClient())->getDrive();
     }
 
     public function listFiles(string $folderId, array $options = []): Collection
     {
-        $defaults = [
-            'q' => "'{$folderId}' in parents and trashed = false and mimeType contains 'image/'",
-            'fields' => 'files(id,name,mimeType,size,modifiedTime,parents,webViewLink)',
-            'pageSize' => 1000,
-        ];
+        $files = [];
 
-        $opt = array_merge($defaults, $options);
+        $this->paginateFiles($folderId, $options, function ($file) use (&$files): void {
+            $files[] = $file;
+        });
 
-        $response = $this->drive->files->listFiles($opt);
-
-        return collect($response->getFiles());
+        return collect($files);
     }
 
-    public function getFile(string $fileId, array $options = []): DriveService\Google_Service_Drive_File
+    public function paginateFiles(string $folderId, array $options, callable $callback): int
     {
+        $folderId = $this->assertDriveId($folderId);
+
+        $defaults = [
+            'q' => "'{$folderId}' in parents and trashed = false and mimeType contains 'image/'",
+            'fields' => 'nextPageToken,files(id,name,mimeType,size,modifiedTime,parents,webViewLink)',
+            'pageSize' => 500,
+        ];
+
+        return $this->paginate($defaults, $options, $callback);
+    }
+
+    public function countFiles(string $folderId, array $options = []): int
+    {
+        return $this->paginateFiles($folderId, $options, fn ($file): int => 0);
+    }
+
+    public function getFile(string $fileId, array $options = []): object
+    {
+        $fileId = $this->assertDriveId($fileId);
+
         $defaults = [
             'fields' => 'id,name,mimeType,size,modifiedTime,parents,webViewLink',
         ];
 
-        $opt = array_merge($defaults, $options);
-
-        return $this->drive->files->get($fileId, $opt);
+        return $this->googleClient->getDrive()->files->get($fileId, array_merge($defaults, $options));
     }
 
     public function listFolders(string $parentFolderId, array $options = []): Collection
     {
+        $folders = [];
+
+        $this->paginateFolders($parentFolderId, $options, function ($folder) use (&$folders): void {
+            $folders[] = $folder;
+        });
+
+        return collect($folders);
+    }
+
+    public function paginateFolders(string $parentFolderId, array $options, callable $callback): int
+    {
+        $parentFolderId = $this->assertDriveId($parentFolderId);
+
         $defaults = [
             'q' => "'{$parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-            'fields' => 'files(id,name)',
-            'pageSize' => 1000,
+            'fields' => 'nextPageToken,files(id,name,mimeType)',
+            'pageSize' => 200,
         ];
 
-        $opt = array_merge($defaults, $options);
-
-        $response = $this->drive->files->listFiles($opt);
-
-        return collect($response->getFiles());
+        return $this->paginate($defaults, $options, $callback);
     }
 
-    public function getFolder(string $folderId): ?DriveService\Google_Service_Drive_File
+    public function getFolder(string $folderId): ?object
     {
+        $folderId = $this->assertDriveId($folderId);
+
         try {
-            return $this->drive->files->get($folderId, [
+            return $this->googleClient->getDrive()->files->get($folderId, [
                 'fields' => 'id,name,mimeType',
             ]);
-        } catch (\Exception $e) {
-            return null;
+        } catch (\Google\Service\Exception $e) {
+            if (in_array($e->getCode(), [403, 404], true)) {
+                return null;
+            }
+
+            throw $e;
         }
     }
 
-    public function getFolderByName(string $parentFolderId, string $folderName): ?DriveService\Google_Service_Drive_File
+    public function getFolderByName(string $parentFolderId, string $folderName): ?object
     {
-        $response = $this->drive->files->listFiles([
-            'q' => "'{$parentFolderId}' in parents and name = '{$folderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-            'fields' => 'files(id,name)',
+        $folder = $this->listFolders($parentFolderId, [
+            'q' => "'{$this->assertDriveId($parentFolderId)}' in parents and name = '{$this->escapeQueryValue($folderName)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
             'pageSize' => 1,
-        ]);
+        ])->first();
 
-        $files = collect($response->getFiles());
-
-        return $files->first() ? $this->getFile($files->first()->getId()) : null;
+        return $folder ? $this->getFile($folder->getId()) : null;
     }
 
-    public function getFileDownloadUrl(string $fileId): ?string
+    public function generateViewUrl(string $fileId): string
     {
-        try {
-            $this->drive->permissions->create($fileId, new DriveService\Permission([
-                'type' => 'anyone',
-                'role' => 'reader',
-            ]));
-
-            return "https://drive.google.com/uc?id={$fileId}&export=download";
-        } catch (\Exception $e) {
-            return null;
-        }
+        return "https://drive.google.com/file/d/{$this->assertDriveId($fileId)}/view";
     }
 
     public function getDownloadUrl(string $fileId): ?string
     {
-        return $this->getFileDownloadUrl($fileId);
+        return null;
     }
 
     public function getDrive(): DriveService
     {
-        return $this->drive;
+        return $this->googleClient->getDrive();
+    }
+
+    protected function paginate(array $defaults, array $options, callable $callback): int
+    {
+        $options = array_merge($defaults, $options);
+
+        if (isset($options['pageSize'])) {
+            $options['pageSize'] = max(1, min(1000, (int) $options['pageSize']));
+        }
+
+        if (isset($options['fields']) && !str_contains((string) $options['fields'], 'nextPageToken')) {
+            $options['fields'] = rtrim((string) $options['fields'], ',') . ',nextPageToken';
+        }
+
+        $count = 0;
+        $pageToken = null;
+
+        do {
+            if ($pageToken) {
+                $options['pageToken'] = $pageToken;
+            }
+
+            $response = $this->googleClient->getDrive()->files->listFiles($options);
+            $items = $response->getFiles() ?? [];
+
+            foreach ($items as $item) {
+                $callback($item);
+                $count++;
+            }
+
+            $pageToken = $response->getNextPageToken();
+        } while ($pageToken);
+
+        return $count;
+    }
+
+    protected function assertDriveId(string $folderId): string
+    {
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $folderId)) {
+            throw new InvalidArgumentException('ID de Google Drive inválido.');
+        }
+
+        return $folderId;
+    }
+
+    protected function escapeQueryValue(string $value): string
+    {
+        return str_replace("'", "\\'", $value);
     }
 }

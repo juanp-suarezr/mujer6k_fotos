@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ImportarEventoDriveJob;
+use App\Http\Requests\ImportacionRequest;
 use App\Models\Evento;
 use App\Models\Importacion;
-use App\Http\Requests\ImportacionRequest;
+use App\Services\SyncService;
 use Inertia\Inertia;
 
 class ImportacionController extends Controller
 {
-    function __construct()
+    public function __construct(protected SyncService $syncService)
     {
         $this->middleware('permission:importaciones-listar|importaciones-crear|importaciones-editar|importaciones-eliminar', ['only' => ['index', 'store']]);
         $this->middleware('permission:importaciones-crear', ['only' => ['create', 'store']]);
-        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update', 'sync']]);
+        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update', 'sync', 'progress']]);
         $this->middleware('permission:importaciones-eliminar', ['only' => ['destroy']]);
     }
 
@@ -42,8 +42,11 @@ class ImportacionController extends Controller
     function edit(Importacion $importacion)
     {
         return Inertia::render('Importaciones/Edit', [
-            'importacion' => $importacion->load(['evento', 'logs', 'fotos']),
+            'importacion' => $importacion->load(['evento', 'logs']),
             'eventos' => Evento::all(),
+            'progress' => $this->syncService->progress($importacion),
+            'fotos' => $importacion->fotos()->orderByDesc('id')->limit(100)->get(),
+            'fotos_count' => $importacion->fotos()->count(),
         ]);
     }
 
@@ -57,10 +60,15 @@ class ImportacionController extends Controller
 
     function sync(Importacion $importacion)
     {
-        ImportarEventoDriveJob::dispatch($importacion->evento_id, $importacion->carpeta_drive_id, $importacion->id);
+        $this->syncService->start($importacion);
 
         return redirect()->route('importaciones.edit', $importacion->id)
             ->with('success', 'Sincronización iniciada');
+    }
+
+    function progress(Importacion $importacion)
+    {
+        return response()->json($this->syncService->progress($importacion));
     }
 
     function destroy(Importacion $importacion)
