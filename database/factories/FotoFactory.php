@@ -17,7 +17,7 @@ class FotoFactory extends Factory
     {
         return [
             'evento_id' => Evento::factory(),
-            'importacion_id' => Importacion::factory(),
+            'importacion_id' => null,
             'corredor_id' => Corredor::factory(),
             'nombre_archivo' => fake()->bothify('IMG-####.jpg'),
             'google_drive_file_id' => fake()->unique()->regexify('[a-zA-Z0-9_-]{33}'),

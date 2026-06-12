@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('fotos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('evento_id')->constrained('eventos')->cascadeOnDelete();
-            $table->foreignId('importacion_id')->nullable()->constrained('importaciones')->nullOnDelete();
             $table->foreignId('corredor_id')->nullable()->constrained('corredores')->nullOnDelete();
             $table->string('nombre_archivo');
             $table->string('google_drive_file_id')->comment('ID del archivo en Google Drive');
@@ -25,7 +24,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('evento_id');
-            $table->index('importacion_id');
             $table->index('corredor_id');
             $table->index('google_drive_file_id');
             $table->index('estado');
