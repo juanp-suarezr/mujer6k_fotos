@@ -114,6 +114,18 @@ class DriveBrowserController extends Controller
         }
 
         try {
+            $folder = $this->driveService->getFolder($folderId);
+
+            if (!$folder || $folder->getMimeType() !== 'application/vnd.google-apps.folder') {
+                return back()->withInput()->with('error', 'La carpeta de Google Drive especificada no es válida o no es accesible.');
+            }
+        } catch (\RuntimeException $e) {
+            return back()->withInput()->with('error', 'Error al conectar con Google Drive: ' . $e->getMessage());
+        } catch (\Google\Service\Exception $e) {
+            return back()->withInput()->with('error', 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage());
+        }
+
+        try {
             $importacion = $this->syncService->createForEvento($evento, $folderId);
             $importacion->estado = ImportacionEstado::Pendiente->value;
             $importacion->save();

@@ -121,7 +121,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryLink from '@/Components/PrimaryLink.vue';
 import Pagination from '@/Components/Pagination.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/solid';
 

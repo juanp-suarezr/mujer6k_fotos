@@ -232,7 +232,7 @@ import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import { ArrowPathIcon, PhotoIcon, TrashIcon, ArrowLeftIcon, CheckIcon } from '@heroicons/vue/24/solid';
 import { ref, watch, onUnmounted, computed } from 'vue';
 
