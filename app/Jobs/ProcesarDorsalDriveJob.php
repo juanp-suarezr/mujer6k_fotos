@@ -38,7 +38,7 @@ class ProcesarDorsalDriveJob implements ShouldQueue
 
         $processed = 0;
 
-        $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
+$driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
             $parents = $file->getParents() ?? [];
             $parentId = null;
             if (is_array($parents) && count($parents) > 0) {
@@ -48,9 +48,7 @@ class ProcesarDorsalDriveJob implements ShouldQueue
             }
 
             $modifiedTime = $file->getModifiedTime();
-            $fechaModificacion = $modifiedTime instanceof \DateTimeInterface
-                ? Carbon::parse($modifiedTime)->format('Y-m-d H:i:s')
-                : $modifiedTime;
+            $fechaModificacion = Carbon::parse($modifiedTime)->format('Y-m-d H:i:s');
 
             $rows = [
                 'evento_id' => $importacion->evento_id,
