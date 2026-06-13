@@ -72,9 +72,10 @@
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <SecondaryButton :href="route('eventos.index')" type="button" class="text-sm">
+            <Link :href="route('eventos.index')" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+              <ArrowLeftIcon class="h-4 w-4 mr-1" />
               Cancelar
-            </SecondaryButton>
+            </Link>
             <PrimaryButton type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="text-sm">
               <CheckIcon class="h-4 w-4 mr-1" />
               Guardar Evento

@@ -3,10 +3,12 @@
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-3xl font-bold text-gray-800">Eventos Deportivos</h2>
-        <PrimaryButton :href="route('eventos.create')" class="text-sm">
-          <PlusIcon class="h-5 w-5 mr-2" />
-          Nuevo Evento
-        </PrimaryButton>
+        <Link :href="route('eventos.create')" class="text-sm">
+          <PrimaryButton>
+            <PlusIcon class="h-5 w-5 mr-2" />
+            Nuevo Evento
+          </PrimaryButton>
+        </Link>
       </div>
     </template>
 
