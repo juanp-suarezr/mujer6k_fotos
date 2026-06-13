@@ -8,6 +8,7 @@ use App\Models\Foto;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
 use App\Services\SyncService;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -48,6 +49,11 @@ class SyncDorsalJob implements ShouldQueue
                 $parentId = $parents->getIterator()->current();
             }
 
+            $modifiedTime = $file->getModifiedTime();
+            $fechaModificacion = $modifiedTime instanceof \DateTimeInterface
+                ? Carbon::parse($modifiedTime)->format('Y-m-d H:i:s')
+                : $modifiedTime;
+
             $rows = [
                 'evento_id' => $importacion->evento_id,
                 'importacion_id' => $importacion->id,
@@ -63,7 +69,7 @@ class SyncDorsalJob implements ShouldQueue
                 'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($file->getId()),
                 'url_descarga' => null,
                 'estado' => FotoEstado::Disponible->value,
-                'fecha_modificacion' => $file->getModifiedTime(),
+                'fecha_modificacion' => $fechaModificacion,
                 'metadata' => json_encode([
                     'parents' => is_array($parents) ? $parents : iterator_to_array($parents->getIterator()),
                     'folder_id' => $this->folderId,

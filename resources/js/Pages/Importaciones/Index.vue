@@ -152,7 +152,10 @@ const fetchProgress = () => {
   if (pollingIds.value.has('all')) return;
   pollingIds.value.add('all');
 
-  router.reload({
+  router.get(route('importaciones.index'), {}, {
+    preserveScroll: true,
+    preserveState: true,
+    only: ['importaciones'],
     onFinish: () => {
       pollingIds.value.delete('all');
     },
@@ -167,9 +170,7 @@ watch(() => props.importaciones.data, (importaciones) => {
 
   if (hasProcessing && !pollInterval) {
     pollInterval = setInterval(() => {
-      props.importaciones.data
-        .filter(i => i.estado === 'procesando')
-        .forEach(i => fetchProgress(i));
+      fetchProgress();
     }, 3000);
   } else if (!hasProcessing && pollInterval) {
     clearInterval(pollInterval);
@@ -182,9 +183,7 @@ onMounted(() => {
   const hasProcessing = props.importaciones.data?.some(i => i.estado === 'procesando');
   if (hasProcessing) {
     pollInterval = setInterval(() => {
-      props.importaciones.data
-        .filter(i => i.estado === 'procesando')
-        .forEach(i => fetchProgress(i));
+      fetchProgress();
     }, 3000);
   }
 });
