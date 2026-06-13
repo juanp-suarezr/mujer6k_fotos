@@ -90,10 +90,12 @@
                     <button
                       v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
                       @click="syncImportacion(importacion)"
-                      class="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition"
+                      :disabled="syncingId === importacion.id"
+                      class="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Sincronizar"
                     >
-                      <ArrowPathIcon class="h-4 w-4" />
+                      <ArrowPathIcon v-if="syncingId === importacion.id" class="h-4 w-4 animate-spin" />
+                      <ArrowPathIcon v-else class="h-4 w-4" />
                     </button>
                   </div>
                 </td>
@@ -120,11 +122,14 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryLink from '@/Components/PrimaryLink.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   importaciones: { type: Object, required: true },
 });
+
+const syncingId = ref(null);
 
 const progressPercentage = (importacion) => {
   if (!importacion.total_archivos) return 0;
@@ -132,8 +137,12 @@ const progressPercentage = (importacion) => {
 };
 
 const syncImportacion = (importacion) => {
+  syncingId.value = importacion.id;
   router.post(route('importaciones.sync', importacion.id), {}, {
     preserveScroll: true,
+    onFinish: () => {
+      syncingId.value = null;
+    },
   });
 };
 </script>

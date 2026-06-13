@@ -79,9 +79,10 @@
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <SecondaryButton :href="route('importaciones.index')" type="button" class="text-sm">
+            <Link :href="route('importaciones.index')" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+              <ArrowLeftIcon class="h-4 w-4 mr-1" />
               Cancelar
-            </SecondaryButton>
+            </Link>
             <PrimaryButton type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" class="text-sm">
               <CheckIcon class="h-4 w-4 mr-1" />
               Guardar Cambios
@@ -147,10 +148,12 @@
           <div v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'" class="flex justify-center">
             <button
               @click="syncImportacion"
-              class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              :disabled="syncing"
+              class="inline-flex items-center px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ArrowPathIcon class="h-4 w-4 mr-2" />
-              Iniciar Sincronización
+              <ArrowPathIcon v-if="syncing" class="h-4 w-4 mr-2 animate-spin" />
+              <ArrowPathIcon v-else class="h-4 w-4 mr-2" />
+              {{ syncing ? 'Sincronizando...' : 'Iniciar Sincronización' }}
             </button>
           </div>
 
@@ -254,6 +257,7 @@ const submit = () => {
 };
 
 const pollStatus = ref(false);
+const syncing = ref(false);
 let pollInterval = null;
 
 const fetchProgress = () => {
@@ -301,8 +305,15 @@ const formatDate = (date) => {
 };
 
 const syncImportacion = () => {
+  syncing.value = true;
   router.post(route('importaciones.sync', props.importacion.id), {}, {
     preserveScroll: true,
+    onSuccess: () => {
+      syncing.value = false;
+    },
+    onError: () => {
+      syncing.value = false;
+    },
   });
 };
 

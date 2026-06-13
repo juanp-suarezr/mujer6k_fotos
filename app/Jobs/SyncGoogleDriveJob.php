@@ -33,18 +33,50 @@ class SyncGoogleDriveJob implements ShouldQueue
         $importacion = Importacion::findOrFail($this->importacionId);
 
         if (!$importacion->carpeta_drive_id) {
-            throw new RuntimeException('La importación no tiene carpeta de Google Drive configurada.');
+            $errorMsg = 'La importación no tiene carpeta de Google Drive configurada.';
+            $syncService->log($importacion, LogTipo::Error, 'Error: sin carpeta Drive', [
+                'error' => $errorMsg,
+                'importacion_id' => $this->importacionId,
+            ]);
+            throw new RuntimeException($errorMsg);
         }
+
+        $syncService->log($importacion, LogTipo::Info, 'Job iniciado: obteniendo carpeta raíz', [
+            'carpeta_drive_id' => $importacion->carpeta_drive_id,
+            'importacion_id' => $this->importacionId,
+        ]);
 
         $syncService->markStarted($importacion);
 
         $folder = $driveService->getFolder($importacion->carpeta_drive_id);
 
+        $syncService->log($importacion, LogTipo::Info, 'Respuesta getFolder', [
+            'folder_found' => (bool) $folder,
+            'mime_type' => $folder ? $folder->getMimeType() : null,
+            'folder_name' => $folder ? $folder->getName() : null,
+        ]);
+
         if (!$folder || $folder->getMimeType() !== 'application/vnd.google-apps.folder') {
-            throw new RuntimeException('La carpeta raíz de Google Drive no es válida.');
+            $errorMsg = 'La carpeta raíz de Google Drive no es válida. ID: ' . $importacion->carpeta_drive_id;
+            $syncService->log($importacion, LogTipo::Error, 'Error: carpeta no válida', [
+                'error' => $errorMsg,
+                'carpeta_drive_id' => $importacion->carpeta_drive_id,
+                'folder_found' => (bool) $folder,
+                'mime_type' => $folder ? $folder->getMimeType() : 'null',
+            ]);
+            throw new RuntimeException($errorMsg);
         }
 
+        $syncService->log($importacion, LogTipo::Info, 'Buscando subcarpetas (dorsales)', [
+            'carpeta_raiz' => $importacion->carpeta_drive_id,
+        ]);
+
         $totalFolders = $this->dispatchDorsalJobs($driveService, $importacion);
+
+        $syncService->log($importacion, LogTipo::Info, 'Contando archivos en carpeta raíz', [
+            'carpeta_raiz' => $importacion->carpeta_drive_id,
+        ]);
+
         $totalFiles = $driveService->countFiles($importacion->carpeta_drive_id);
 
         $importacion->update([
@@ -56,9 +88,14 @@ class SyncGoogleDriveJob implements ShouldQueue
         $syncService->log($importacion, LogTipo::Info, 'Carpeta principal analizada', [
             'folders' => $totalFolders,
             'files' => $totalFiles,
+            'importacion_id' => $this->importacionId,
         ]);
 
         if ($totalFolders === 0) {
+            $syncService->log($importacion, LogTipo::Warning, 'Sin subcarpetas detectadas', [
+                'total_folders' => 0,
+                'total_files' => $totalFiles,
+            ]);
             $syncService->complete($importacion, [
                 'folders_processed' => 0,
                 'files_processed' => 0,

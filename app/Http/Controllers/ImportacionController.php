@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ImportacionEstado;
+use App\Enums\LogTipo;
 use App\Http\Requests\ImportacionRequest;
 use App\Models\Evento;
 use App\Models\GoogleConnection;
 use App\Models\Importacion;
+use App\Services\GoogleDriveService;
 use App\Services\SyncService;
 use Inertia\Inertia;
 
@@ -40,9 +42,24 @@ class ImportacionController extends Controller
         $data = $request->validated();
         $data['estado'] = $data['estado'] ?? ImportacionEstado::Pendiente->value;
 
+        if ($data['origen'] === 'drive' && !empty($data['carpeta_drive_id'])) {
+            try {
+                $folder = app(GoogleDriveService::class)->getFolder($data['carpeta_drive_id']);
+
+                if (!$folder || $folder->getMimeType() !== 'application/vnd.google-apps.folder') {
+                    return back()->withInput()->with('error', 'La carpeta de Google Drive especificada no es válida. Verifica que el ID corresponda a una carpeta accesible.');
+                }
+            } catch (\RuntimeException $e) {
+                return back()->withInput()->with('error', 'Error al conectar con Google Drive: ' . $e->getMessage());
+            } catch (\Google\Service\Exception $e) {
+                return back()->withInput()->with('error', 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage());
+            }
+        }
+
         $importacion = Importacion::create($data);
 
-        return redirect()->route('importaciones.edit', $importacion->id);
+        return redirect()->route('importaciones.edit', $importacion->id)
+            ->with('success', 'Importación creada correctamente');
     }
 
     function edit(Importacion $importacion)
@@ -59,7 +76,23 @@ class ImportacionController extends Controller
 
     function update(ImportacionRequest $request, Importacion $importacion)
     {
-        $importacion->update($request->validated());
+        $data = $request->validated();
+
+        if ($data['origen'] === 'drive' && !empty($data['carpeta_drive_id']) && $data['carpeta_drive_id'] !== $importacion->carpeta_drive_id) {
+            try {
+                $folder = app(GoogleDriveService::class)->getFolder($data['carpeta_drive_id']);
+
+                if (!$folder || $folder->getMimeType() !== 'application/vnd.google-apps.folder') {
+                    return back()->withInput()->with('error', 'La carpeta de Google Drive especificada no es válida. Verifica que el ID corresponda a una carpeta accesible.');
+                }
+            } catch (\RuntimeException $e) {
+                return back()->withInput()->with('error', 'Error al conectar con Google Drive: ' . $e->getMessage());
+            } catch (\Google\Service\Exception $e) {
+                return back()->withInput()->with('error', 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage());
+            }
+        }
+
+        $importacion->update($data);
 
         return redirect()->route('importaciones.edit', $importacion->id)
             ->with('success', 'Importación actualizada correctamente');
@@ -67,10 +100,33 @@ class ImportacionController extends Controller
 
     function sync(Importacion $importacion)
     {
-        $this->syncService->start($importacion);
+        try {
+            $this->syncService->start($importacion);
 
-        return redirect()->route('importaciones.edit', $importacion->id)
-            ->with('success', 'Sincronización iniciada');
+            $this->syncService->log($importacion, LogTipo::Info, 'Sincronización iniciada exitosamente', [
+                'importacion_id' => $importacion->id,
+            ]);
+
+            return redirect()->route('importaciones.edit', $importacion->id)
+                ->with('success', 'Sincronización iniciada');
+        } catch (\RuntimeException $e) {
+            $this->syncService->log($importacion, LogTipo::Error, 'Error al iniciar sincronización', [
+                'error' => $e->getMessage(),
+                'importacion_id' => $importacion->id,
+            ]);
+
+            return redirect()->route('importaciones.edit', $importacion->id)
+                ->with('error', $e->getMessage());
+        } catch (\Google\Service\Exception $e) {
+            $errorMsg = 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage();
+            $this->syncService->log($importacion, LogTipo::Error, 'Excepción Google API en sync()', [
+                'error' => $errorMsg,
+                'code' => $e->getCode(),
+                'importacion_id' => $importacion->id,
+            ]);
+            return redirect()->route('importaciones.edit', $importacion->id)
+                ->with('error', $errorMsg);
+        }
     }
 
     function progress(Importacion $importacion)

@@ -1,5 +1,6 @@
 <template>
     <Link
+        :href="href"
         class="inline-flex whitespace-nowrap items-center px-4 py-2 bg-sky-700 border border-gray-300 rounded-md font-semibold text-xs text-white uppercase tracking-widest shadow-sm hover:bg-primary focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
     <slot />
     </Link>
@@ -16,6 +17,10 @@ watch(() => usePage().props.accesibilidad.letra, (newVal) => {
 });
 
 defineProps({
+    href: {
+        type: String,
+        required: true,
+    },
     type: {
         type: String
     },

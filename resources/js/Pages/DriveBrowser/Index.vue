@@ -7,6 +7,13 @@
     </template>
 
     <div class="py-6">
+      <div v-if="error" class="max-w-5xl mx-auto bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <p class="text-sm text-red-700">
+          <ExclamationTriangleIcon class="h-4 w-4 inline mr-1" />
+          {{ error }}
+        </p>
+      </div>
+
       <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div v-if="folder" class="mb-4">
           <p class="text-sm text-gray-500">Carpeta raíz:</p>
@@ -58,13 +65,14 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Link } from '@inertiajs/vue3';
-import { FolderIcon, DocumentIcon } from '@heroicons/vue/24/solid';
+import { FolderIcon, DocumentIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   folderId: { type: [String, null], required: true },
   folder: { type: [Object, null], default: null },
   folders: { type: Array, default: () => [] },
   files: { type: Array, default: () => [] },
+  error: { type: String, default: '' },
 });
 
 const formatSize = (bytes) => {

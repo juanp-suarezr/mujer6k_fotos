@@ -38,6 +38,13 @@ class SyncDorsalJob implements ShouldQueue
             ->where('dorsal', $this->dorsal)
             ->first();
 
+        $syncService->log($importacion, LogTipo::Info, "Procesando dorsal", [
+            'dorsal' => $this->dorsal,
+            'folder_id' => $this->folderId,
+            'importacion_id' => $this->importacionId,
+            'corredor_id' => $corredor?->id,
+        ]);
+
         $processed = 0;
 
         $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
@@ -103,6 +110,7 @@ class SyncDorsalJob implements ShouldQueue
         $syncService->log($importacion, LogTipo::Info, "Dorsal {$this->dorsal} procesado", [
             'folder_id' => $this->folderId,
             'files' => $processed,
+            'corredor_id' => $corredor?->id,
         ]);
 
         $syncService->completeIfFinished($importacion);

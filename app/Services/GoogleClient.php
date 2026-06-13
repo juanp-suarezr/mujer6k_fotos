@@ -83,7 +83,18 @@ class GoogleClient
     public function getDrive(): Drive
     {
         if (!$this->drive) {
-            $this->forConnection();
+            $connection = null;
+
+            try {
+                $connection = \App\Models\GoogleConnection::where('status', \App\Enums\GoogleConnectionStatus::Conectado)
+                    ->whereNotNull('access_token')
+                    ->latest()
+                    ->first();
+            } catch (\Throwable $e) {
+                // DB not ready yet
+            }
+
+            $this->forConnection($connection);
         }
 
         return $this->drive;

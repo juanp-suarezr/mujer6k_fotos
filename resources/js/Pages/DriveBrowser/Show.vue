@@ -12,6 +12,13 @@
     </template>
 
     <div class="py-6 space-y-6">
+      <div v-if="error" class="max-w-5xl mx-auto bg-red-50 border border-red-200 rounded-xl p-4">
+        <p class="text-sm text-red-700">
+          <ExclamationTriangleIcon class="h-4 w-4 inline mr-1" />
+          {{ error }}
+        </p>
+      </div>
+
       <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-semibold text-gray-800">Carpeta: {{ folderId }}</h3>
@@ -77,7 +84,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { FolderIcon, PhotoIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/solid';
+import { FolderIcon, PhotoIcon, ArrowDownTrayIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/solid';
 import { ref } from 'vue';
 
 const props = defineProps({
@@ -85,6 +92,7 @@ const props = defineProps({
   folders: { type: Array, default: () => [] },
   files: { type: Array, default: () => [] },
   eventos: { type: Array, default: () => [] },
+  error: { type: String, default: '' },
 });
 
 const selectedEvento = ref('');

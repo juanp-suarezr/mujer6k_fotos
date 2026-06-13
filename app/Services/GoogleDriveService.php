@@ -6,6 +6,7 @@ use App\Contracts\StorageDrive;
 use Google\Service\Drive as DriveService;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
+use RuntimeException;
 
 class GoogleDriveService implements StorageDrive
 {
@@ -133,21 +134,28 @@ class GoogleDriveService implements StorageDrive
 
         $count = 0;
         $pageToken = null;
+        $iteration = 0;
 
         do {
+            $iteration++;
             if ($pageToken) {
                 $options['pageToken'] = $pageToken;
             }
 
-            $response = $this->googleClient->getDrive()->files->listFiles($options);
-            $items = $response->getFiles() ?? [];
+            try {
+                $response = $this->googleClient->getDrive()->files->listFiles($options);
+                $items = $response->getFiles() ?? [];
 
-            foreach ($items as $item) {
-                $callback($item);
-                $count++;
+                foreach ($items as $item) {
+                    $callback($item);
+                    $count++;
+                }
+
+                $pageToken = $response->getNextPageToken();
+            } catch (\Google\Service\Exception $e) {
+                throw new RuntimeException("Error en Google Drive API (paginate iteración {$iteration}): " . $e->getMessage(), $e->getCode(), $e);
             }
 
-            $pageToken = $response->getNextPageToken();
         } while ($pageToken);
 
         return $count;
