@@ -42,101 +42,49 @@ class SyncService
             'last_error' => null,
         ]);
 
-        $this->log($importacion, LogTipo::Info, 'Iniciando sincronización', [
-            'origen' => $importacion->origen,
-            'carpeta_drive_id' => $importacion->carpeta_drive_id,
-            'evento_id' => $importacion->evento_id,
-            'importacion_id' => $importacion->id,
-        ]);
-
         if ($importacion->origen === 'drive' && $importacion->carpeta_drive_id) {
             try {
-                $this->log($importacion, LogTipo::Info, 'Paso 1: Obteniendo servicio de Google Drive', [
-                    'folder_id' => $importacion->carpeta_drive_id,
-                ]);
+                $folder = app(GoogleDriveService::class)->getFolder($importacion->carpeta_drive_id);
 
-                $driveService = app(GoogleDriveService::class);
-
-                $this->log($importacion, LogTipo::Info, 'Paso 2: Consultando carpeta en Drive API', [
-                    'folder_id' => $importacion->carpeta_drive_id,
-                ]);
-
-                $folder = $driveService->getFolder($importacion->carpeta_drive_id);
-
-                $this->log($importacion, LogTipo::Info, 'Paso 3: Respuesta recibida', [
-                    'folder_found' => (bool) $folder,
-                    'mime_type' => $folder ? $folder->getMimeType() : null,
-                    'folder_name' => $folder ? $folder->getName() : null,
-                ]);
-
-                if (!$folder) {
-                    $errorMsg = "La carpeta de Google Drive (ID: {$importacion->carpeta_drive_id}) no fue encontrada. Verifica que el ID sea correcto y que la cuenta tenga acceso.";
-                    $this->log($importacion, LogTipo::Error, 'Validación fallida: carpeta no encontrada', [
+                if (!$folder || $folder->getMimeType() !== 'application/vnd.google-apps.folder') {
+                    $errorMsg = "La carpeta de Google Drive (ID: {$importacion->carpeta_drive_id}) no es válida o no es accesible.";
+                    $this->log($importacion, LogTipo::Error, 'Validación de carpeta fallida', [
                         'error' => $errorMsg,
                         'folder_id' => $importacion->carpeta_drive_id,
-                        'reason' => 'folder_not_found_or_inaccessible',
-                        'http_code' => '404/403',
                     ]);
                     throw new RuntimeException($errorMsg);
                 }
-
-                if ($folder->getMimeType() !== 'application/vnd.google-apps.folder') {
-                    $errorMsg = "El ID especificado (ID: {$importacion->carpeta_drive_id}) no corresponde a una carpeta. Tipo recibido: {$folder->getMimeType()}";
-                    $this->log($importacion, LogTipo::Error, 'Validación fallida: no es carpeta', [
-                        'error' => $errorMsg,
-                        'folder_id' => $importacion->carpeta_drive_id,
-                        'mime_type' => $folder->getMimeType(),
-                        'reason' => 'not_a_folder',
-                    ]);
-                    throw new RuntimeException($errorMsg);
-                }
-
-                $this->log($importacion, LogTipo::Info, 'Validación exitosa: carpeta confirmada', [
-                    'folder_id' => $folder->getId(),
-                    'folder_name' => $folder->getName(),
-                    'mime_type' => $folder->getMimeType(),
-                ]);
             } catch (\RuntimeException $e) {
-                $this->log($importacion, LogTipo::Error, 'Excepción RuntimeException', [
-                    'error' => $e->getMessage(),
-                    'folder_id' => $importacion->carpeta_drive_id,
-                    'trace' => $e->getTraceAsString(),
-                ]);
-
                 $importacion->update([
                     'estado' => ImportacionEstado::Fallida->value,
                     'fecha_fin' => now(),
                     'last_error' => $e->getMessage(),
                 ]);
-
+                $this->log($importacion, LogTipo::Error, 'Sincronización fallida', [
+                    'error' => $e->getMessage(),
+                ]);
                 throw $e;
             } catch (\Google\Service\Exception $e) {
                 $errorMessage = 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage();
-
-                $this->log($importacion, LogTipo::Error, 'Excepción de Google Drive API', [
-                    'error' => $errorMessage,
-                    'code' => $e->getCode(),
-                    'folder_id' => $importacion->carpeta_drive_id,
-                    'errors' => method_exists($e, 'getErrors') ? $e->getErrors() : [],
-                ]);
-
                 $importacion->update([
                     'estado' => ImportacionEstado::Fallida->value,
                     'fecha_fin' => now(),
                     'last_error' => $errorMessage,
                 ]);
-
+                $this->log($importacion, LogTipo::Error, 'Sincronización fallida', [
+                    'error' => $errorMessage,
+                    'code' => $e->getCode(),
+                ]);
                 throw new RuntimeException($errorMessage, $e->getCode(), $e);
             }
         }
 
-        $this->log($importacion, LogTipo::Info, 'Despachando job SyncGoogleDriveJob', [
-            'job_class' => SyncGoogleDriveJob::class,
-            'importacion_id' => $importacion->id,
-            'queue_connection' => config('queue.default'),
-        ]);
-
         SyncGoogleDriveJob::dispatch($importacion->id);
+
+        $this->log($importacion, LogTipo::Info, 'Sincronización iniciada', [
+            'importacion_id' => $importacion->id,
+            'origen' => $importacion->origen,
+        ]);
 
         return $importacion->fresh();
     }
@@ -150,7 +98,7 @@ class SyncService
             'last_error' => null,
         ]);
 
-        $this->log($importacion, LogTipo::Info, 'Sincronización iniciada', [
+        $this->log($importacion, LogTipo::Info, 'Procesamiento iniciado', [
             'evento_id' => $importacion->evento_id,
             'drive_folder_id' => $importacion->carpeta_drive_id,
         ]);
@@ -162,11 +110,17 @@ class SyncService
             return;
         }
 
-        $importacion->update([
+        $updateData = [
             'estado' => ImportacionEstado::Completada->value,
             'fecha_fin' => now(),
-            'metadata' => array_merge($importacion->metadata ?? [], $metadata),
-        ]);
+        ];
+
+        if (!empty($metadata)) {
+            $currentMetadata = $importacion->metadata ?? [];
+            $updateData['metadata'] = array_merge($currentMetadata, $metadata);
+        }
+
+        $importacion->update($updateData);
 
         $this->log($importacion, LogTipo::Info, 'Sincronización completada', $metadata);
     }

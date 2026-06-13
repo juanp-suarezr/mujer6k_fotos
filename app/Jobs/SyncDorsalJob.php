@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Enums\FotoEstado;
-use App\Enums\LogTipo;
 use App\Models\Corredor;
 use App\Models\Foto;
 use App\Models\Importacion;
@@ -19,11 +18,11 @@ class SyncDorsalJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 5;
+    public int $tries = 1;
 
-    public array $backoff = [10, 30, 120, 300];
+    public int $maxExceptions = 1;
 
-    public int $maxExceptions = 5;
+    public int $timeout = 60;
 
     public function __construct(
         public int $importacionId,
@@ -37,13 +36,6 @@ class SyncDorsalJob implements ShouldQueue
         $corredor = Corredor::where('evento_id', $importacion->evento_id)
             ->where('dorsal', $this->dorsal)
             ->first();
-
-        $syncService->log($importacion, LogTipo::Info, "Procesando dorsal", [
-            'dorsal' => $this->dorsal,
-            'folder_id' => $this->folderId,
-            'importacion_id' => $this->importacionId,
-            'corredor_id' => $corredor?->id,
-        ]);
 
         $processed = 0;
 
@@ -72,11 +64,11 @@ class SyncDorsalJob implements ShouldQueue
                 'url_descarga' => null,
                 'estado' => FotoEstado::Disponible->value,
                 'fecha_modificacion' => $file->getModifiedTime(),
-                'metadata' => [
+                'metadata' => json_encode([
                     'parents' => is_array($parents) ? $parents : iterator_to_array($parents->getIterator()),
                     'folder_id' => $this->folderId,
                     'synced_at' => now()->toIso8601String(),
-                ],
+                ]),
             ];
 
             Foto::query()->upsert(
@@ -107,12 +99,6 @@ class SyncDorsalJob implements ShouldQueue
         $importacion->increment('procesados', $processed);
         $importacion->increment('procesados_folders');
 
-        $syncService->log($importacion, LogTipo::Info, "Dorsal {$this->dorsal} procesado", [
-            'folder_id' => $this->folderId,
-            'files' => $processed,
-            'corredor_id' => $corredor?->id,
-        ]);
-
         $syncService->completeIfFinished($importacion);
     }
 
@@ -126,10 +112,7 @@ class SyncDorsalJob implements ShouldQueue
 
         $importacion->increment('errores');
 
-        app(SyncService::class)->log($importacion, LogTipo::Error, "Error en dorsal {$this->dorsal}", [
-            'folder_id' => $this->folderId,
-            'error' => $exception->getMessage(),
-        ]);
+        app(SyncService::class)->fail($importacion, $exception);
     }
 
     protected function rutaLogica(int $eventoId, string $dorsal, string $fileName): string

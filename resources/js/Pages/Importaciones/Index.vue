@@ -122,7 +122,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryLink from '@/Components/PrimaryLink.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
@@ -130,6 +130,8 @@ const props = defineProps({
 });
 
 const syncingId = ref(null);
+const pollingIds = ref(new Set());
+let pollInterval = null;
 
 const progressPercentage = (importacion) => {
   if (!importacion.total_archivos) return 0;
@@ -145,4 +147,51 @@ const syncImportacion = (importacion) => {
     },
   });
 };
+
+const fetchProgress = () => {
+  if (pollingIds.value.has('all')) return;
+  pollingIds.value.add('all');
+
+  router.reload({
+    onFinish: () => {
+      pollingIds.value.delete('all');
+    },
+    onError: () => {
+      pollingIds.value.delete('all');
+    },
+  });
+};
+
+watch(() => props.importaciones.data, (importaciones) => {
+  const hasProcessing = importaciones?.some(i => i.estado === 'procesando');
+
+  if (hasProcessing && !pollInterval) {
+    pollInterval = setInterval(() => {
+      props.importaciones.data
+        .filter(i => i.estado === 'procesando')
+        .forEach(i => fetchProgress(i));
+    }, 3000);
+  } else if (!hasProcessing && pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+    pollingIds.value.clear();
+  }
+}, { deep: true });
+
+onMounted(() => {
+  const hasProcessing = props.importaciones.data?.some(i => i.estado === 'procesando');
+  if (hasProcessing) {
+    pollInterval = setInterval(() => {
+      props.importaciones.data
+        .filter(i => i.estado === 'procesando')
+        .forEach(i => fetchProgress(i));
+    }, 3000);
+  }
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+  }
+});
 </script>

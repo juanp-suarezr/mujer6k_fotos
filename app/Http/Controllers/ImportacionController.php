@@ -10,6 +10,7 @@ use App\Models\GoogleConnection;
 use App\Models\Importacion;
 use App\Services\GoogleDriveService;
 use App\Services\SyncService;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ImportacionController extends Controller
@@ -103,28 +104,14 @@ class ImportacionController extends Controller
         try {
             $this->syncService->start($importacion);
 
-            $this->syncService->log($importacion, LogTipo::Info, 'Sincronización iniciada exitosamente', [
-                'importacion_id' => $importacion->id,
-            ]);
-
-            return redirect()->route('importaciones.edit', $importacion->id)
+            return redirect()->route('importaciones.index')
                 ->with('success', 'Sincronización iniciada');
         } catch (\RuntimeException $e) {
-            $this->syncService->log($importacion, LogTipo::Error, 'Error al iniciar sincronización', [
-                'error' => $e->getMessage(),
-                'importacion_id' => $importacion->id,
-            ]);
-
-            return redirect()->route('importaciones.edit', $importacion->id)
+            return redirect()->route('importaciones.index')
                 ->with('error', $e->getMessage());
         } catch (\Google\Service\Exception $e) {
             $errorMsg = 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage();
-            $this->syncService->log($importacion, LogTipo::Error, 'Excepción Google API en sync()', [
-                'error' => $errorMsg,
-                'code' => $e->getCode(),
-                'importacion_id' => $importacion->id,
-            ]);
-            return redirect()->route('importaciones.edit', $importacion->id)
+            return redirect()->route('importaciones.index')
                 ->with('error', $errorMsg);
         }
     }
