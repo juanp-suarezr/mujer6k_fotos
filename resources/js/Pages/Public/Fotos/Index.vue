@@ -73,7 +73,7 @@
                             </div>
                             <div class="p-4">
                                 <p class="font-medium text-gray-800">Dorsal #{{ foto.dorsal }}</p>
-                                <p class="text-sm text-gray-500">{{ foto.corredor?.nombre_completo || 'Corredor no registrado' }}</p>
+                                <p class="text-sm text-gray-500">{{ foto.corredor?.nombre_completo || '' }}</p>
                                 <p class="text-xs text-gray-400">{{ foto.evento?.nombre }}</p>
                             </div>
                         </div>
