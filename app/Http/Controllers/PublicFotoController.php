@@ -62,8 +62,10 @@ class PublicFotoController extends Controller
 
         $fotos = Foto::with(['evento'])
             ->where('estado', 'disponible')
-            ->whereNull('dorsal')
-            ->orWhere('dorsal', '')
+            ->where(function ($query) {
+                $query->whereNull('dorsal')
+                    ->orWhere('dorsal', '');
+            })
             ->limit(50)
             ->get();
 

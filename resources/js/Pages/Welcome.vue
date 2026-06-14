@@ -597,24 +597,20 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                                 :class="{ '!bg-yellow-200 !text-black !border-yellow-200': isContrast }">
                                 MÁS INFORMACIÓN
                             </a>
-                        </div>
-<Link
-                            :href="route('fotos.public.sin-dorsal')"
-                            class="inline-flex items-center justify-center w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#FFC107] to-[#FF9800] text-black font-extrabold text-xs sm:text-sm lg:text-base tracking-widest rounded-xl hover:from-[#FFEB3B] hover:to-[#FFC107] transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(255,193,7,0.4)] hover:shadow-[0_6px_30px_rgba(255,193,7,0.6)] animate-pulse"
-                        >
-                            <PhotoIcon class="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                            VER FOTOS SIN DORSAL
-                        </Link>
-                    </div>
 
-                    <!-- Back to CTA Section -->
-                    <a href="#inicio"
-                        class="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-800 font-bold text-sm sm:text-base tracking-wider rounded-xl
-                            border-2 border-gray-200 hover:border-[#F57C00]/50 hover:text-[#F57C00]
-                            transition-all duration-300 transform hover:scale-105 active:scale-95
-                            text-center">
-                        BUSCAR MIS FOTOS
-                    </a>
+                            <!-- Button for photos without dorsal - prominent yellow -->
+                            <div class="pt-6 border-t border-[#F57C00]/20 mt-6">
+                                <Link
+                                    :href="route('fotos.public.sin-dorsal')"
+                                    class="inline-flex items-center justify-center w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-[#FFC107] to-[#FF9800] text-black font-extrabold text-sm sm:text-base lg:text-lg tracking-widest rounded-xl hover:from-[#FFEB3B] hover:to-[#FFC107] transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(255,193,7,0.4)] hover:shadow-[0_6px_30px_rgba(255,193,7,0.6)] animate-pulse"
+                                >
+                                    <PhotoIcon class="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                                    VER FOTOS SIN DORSAL
+                                </Link>
+                                <p class="text-xs text-gray-500 mt-2 text-center lg:text-left">¿No recuerdas tu dorsal? Mira todas las fotos disponibles.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
