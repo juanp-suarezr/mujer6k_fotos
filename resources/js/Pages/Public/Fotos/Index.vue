@@ -83,7 +83,12 @@
 
                             <div class="px-4 pb-4 flex gap-2">
                                 <PrimaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
-                                    Ver Foto
+                                    <EyeIcon class="h-5 w-5 mr-2" />
+                                    
+                                </PrimaryButton>
+                                <PrimaryButton @click="downloadFoto(foto)" class="flex-1 text-xs">
+                                    <ArrowDownTrayIcon class="h-5 w-5 mr-2" />
+                                    
                                 </PrimaryButton>
                                 
                             </div>
