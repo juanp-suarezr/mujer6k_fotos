@@ -147,6 +147,9 @@ const startTyping = () => {
     }, 8000);
 };
 
+
+
+
 // --- Stats Counter Animation ---
 const statsVisible = ref(false);
 const counters = ref([
@@ -437,7 +440,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                         </div>
 
                         <!-- Main Title with Typing Animation -->
-                        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black leading-none text-white mb-1 sm:mb-2 min-h-[3rem] sm:min-h-[4rem] md:min-h-[5rem] lg:min-h-[6rem] xl:min-h-[7rem]"
+                        <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-5xl font-black leading-none text-white mb-1 sm:mb-2"
                             :class="{ '!text-yellow-200': isContrast }">
                             <span class="block typing-container">
                                 <span class="typing-text">{{ typedText }}</span>
@@ -446,7 +449,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                         </h1>
 
                         <!-- Subtitle with reveal -->
-                        <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white/90 mt-1 sm:mt-2 mb-4 sm:mb-6 tracking-wide"
+                        <h2 class="text-xl sm:text-2xl md:text-2xl lg:text-2xl xl:text-2xl font-extrabold text-white/90 mt-1 sm:mt-2 mb-4 sm:mb-6 tracking-wide"
                             :class="{ '!text-yellow-200': isContrast }"
                             data-aos="fade-up" data-aos-delay="200">
                             POR DORSAL
