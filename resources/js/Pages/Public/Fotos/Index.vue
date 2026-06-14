@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Results Section -->
-                <div v-if="fotos.length > 0" data-aos="fade-up" data-aos-delay="200">
+                <div v-if="fotos.length > 0">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">
                         Resultados encontrados ({{ fotos.length }})
                     </h2>
@@ -82,14 +82,14 @@
                             </div>
 
                             <div class="px-4 pb-4 flex gap-2">
-                                <PrimaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
+                                <SecondaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
                                     <EyeIcon class="h-5 w-5 mr-2" />
                                     
-                                </PrimaryButton>
-                                <PrimaryButton @click="downloadFoto(foto)" class="flex-1 text-xs">
+                                </SecondaryButton>
+                                <SecondaryButton @click="downloadFoto(foto)" class="flex-1 text-xs">
                                     <ArrowDownTrayIcon class="h-5 w-5 mr-2" />
                                     
-                                </PrimaryButton>
+                                </SecondaryButton>
                                 
                             </div>
                         </div>
