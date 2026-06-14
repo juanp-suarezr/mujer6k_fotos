@@ -120,7 +120,7 @@ const handleMouseMove = (e) => {
     const rect = heroRef.value.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
     const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    parallaxOffset.value = { x: x * 8, y: y * 8 };
+    parallaxOffset.value = { x: x * 8, y: y * 12 };
 };
 
 
@@ -275,7 +275,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
 
                 <!-- Runners background image -->
                 <img 
-                    src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=2070&auto=format&fit=crop" 
+                    src="/assets/img/fondo.webp" 
                     alt="Corredores en carrera"
                     class="absolute inset-0 w-full h-full object-cover object-[center_30%] sm:object-center scale-105"
                     style="filter: saturate(1.1) contrast(1.05);"
@@ -349,41 +349,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                 </div>
             </div>
 
-            <!-- Floating Polaroid Photos with 3D Tilt Effect -->
-            <div class="absolute z-20 pointer-events-none hidden lg:block">
-                <!-- Polaroid 1 -->
-                <div class="tilt-card absolute top-[12%] right-[8%] w-40 bg-white p-2 pb-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform rotate-12 animate-float-slow hover:rotate-6 transition-all duration-700 cursor-pointer pointer-events-auto"
-                    data-aos="fade-left" data-aos-delay="300"
-                    @click="form.dorsal = '1542'">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=300&auto=format&fit=crop" 
-                         alt="Corredor" class="w-full h-28 object-cover" loading="lazy" />
-                    <p class="mt-2 text-[10px] font-bold text-gray-700 text-center tracking-wider">DORSAL #1542</p>
-                </div>
-                <!-- Polaroid 2 -->
-                <div class="tilt-card absolute top-[45%] right-[3%] w-36 bg-white p-2 pb-7 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform -rotate-12 animate-float-slower hover:rotate-[-6deg] transition-all duration-700 cursor-pointer pointer-events-auto"
-                    data-aos="fade-left" data-aos-delay="600"
-                    @click="form.dorsal = '0891'">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=300&auto=format&fit=crop" 
-                         alt="Corredora" class="w-full h-24 object-cover object-top" loading="lazy" />
-                    <p class="mt-2 text-[10px] font-bold text-gray-700 text-center tracking-wider">DORSAL #0891</p>
-                </div>
-                <!-- Polaroid 3 -->
-                <div class="tilt-card absolute top-[70%] right-[12%] w-36 bg-white p-2 pb-7 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform rotate-8 animate-float-medium hover:rotate-3 transition-all duration-700 cursor-pointer pointer-events-auto"
-                    data-aos="fade-left" data-aos-delay="900"
-                    @click="form.dorsal = '2317'">
-                    <img src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?q=80&w=300&auto=format&fit=crop" 
-                         alt="Corredores" class="w-full h-24 object-cover" loading="lazy" />
-                    <p class="mt-2 text-[10px] font-bold text-gray-700 text-center tracking-wider">DORSAL #2317</p>
-                </div>
-                <!-- Polaroid 4 -->
-                <div class="tilt-card absolute top-[28%] right-[22%] w-32 bg-white p-1.5 pb-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform -rotate-6 animate-float-slower hover:rotate-[-3deg] transition-all duration-700 cursor-pointer pointer-events-auto"
-                    data-aos="fade-left" data-aos-delay="450"
-                    @click="form.dorsal = '0456'">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=300&auto=format&fit=crop" 
-                         alt="Meta" class="w-full h-20 object-cover" loading="lazy" />
-                    <p class="mt-1.5 text-[9px] font-bold text-gray-700 text-center tracking-wider">META 🏁</p>
-                </div>
-            </div>
+        
 
             <!-- Main Content -->
             <div class="relative z-30 flex flex-col justify-center w-full h-full min-h-screen max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 xl:px-20">
@@ -415,7 +381,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                         </div>
 
                         <!-- Main Title -->
-                        <h1 class="main-title-gradient max-w-full min-w-0 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-black leading-tight mb-1 sm:mb-2 overflow-hidden break-words"
+                        <h1 class="main-title-gradient max-w-full min-w-0 text-2xl sm:text-3xl md:text-5xl lg:text-5xl xl:text-6xl font-black mb-1 sm:mb-2"
                             :class="{ '!bg-none !text-yellow-200': isContrast }">
                             CONSULTA TUS FOTOS
                         </h1>
@@ -571,78 +537,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
 
         </section>
 
-        <!-- ============================================================ -->
-        <!-- STATS COUNTER SECTION -->
-        <!-- ============================================================ -->
-        <section id="stats-section" ref="statsSectionRef"
-            class="relative w-full py-16 sm:py-24 lg:py-32 overflow-hidden bg-gradient-to-b from-[#1a0a0a] via-[#2d0f0f] to-[#1a0505]">
-            
-            <!-- Background decorations -->
-            <div class="absolute inset-0 overflow-hidden">
-                <div class="absolute top-0 left-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-[#F57C00]/5 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-0 right-1/4 w-48 sm:w-80 h-48 sm:h-80 bg-[#D32F2F]/5 rounded-full blur-3xl"></div>
-            </div>
-
-            <div class="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 xl:px-20">
-                <!-- Section Header -->
-                <div class="text-center mb-12 sm:mb-16 lg:mb-20" data-aos="fade-up">
-                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-3 sm:px-4 py-1 sm:py-1.5 mb-4 sm:mb-6 border border-white/20">
-                        <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#FFC107] animate-pulse"></span>
-                        <span class="text-[9px] sm:text-xs font-semibold text-white/80 uppercase tracking-widest">
-                            Nuestro Impacto
-                        </span>
-                    </div>
-                    <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-3 sm:mb-4"
-                        :class="{ '!text-yellow-200': isContrast }">
-                        Mujer Valiente
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC107] via-[#F57C00] to-[#D32F2F]">
-                            6K
-                        </span>
-                    </h2>
-                    <p class="text-sm sm:text-base md:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed"
-                        :class="{ '!text-white !font-bold': isContrast }">
-                        Una carrera que celebra la fuerza, el deporte y la hermandad femenina en Pereira.
-                    </p>
-                </div>
-
-                <!-- Counters Grid -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
-                    <div v-for="(counter, index) in counters" :key="index"
-                        class="relative group"
-                        data-aos="fade-up" :data-aos-delay="200 * (index + 1)">
-                        <div class="flex flex-col items-center text-center p-4 sm:p-6 lg:p-8 rounded-2xl
-                            bg-white/5 backdrop-blur-sm border border-white/10
-                            hover:bg-white/10 hover:border-[#F57C00]/30
-                            transition-all duration-500 group-hover:shadow-lg group-hover:shadow-[#F57C00]/10
-                            transform group-hover:-translate-y-2">
-                            <!-- Icon -->
-                            <div class="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-[#F57C00]/20 to-[#FFC107]/20 
-                                border border-[#F57C00]/30 flex items-center justify-center mb-3 sm:mb-4
-                                group-hover:from-[#F57C00]/40 group-hover:to-[#FFC107]/40
-                                transition-all duration-500">
-                                <component :is="counter.icon" class="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-[#FFC107]" />
-                            </div>
-                            
-                            <!-- Number -->
-                            <div class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-1 tabular-nums"
-                                :class="{ '!text-yellow-200': isContrast }">
-                                <span ref="el => counter.ref = el">{{ statsVisible ? counter.current : 0 }}</span>
-                                <span class="text-[#FFC107]" :class="{ '!text-yellow-200': isContrast }">{{ counter.suffix }}</span>
-                            </div>
-                            
-                            <!-- Label -->
-                            <p class="text-xs sm:text-sm lg:text-base text-gray-400 font-medium"
-                                :class="{ '!text-white': isContrast }">
-                                {{ counter.label }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom transition fade -->
-            <div class="absolute bottom-0 left-0 right-0 h-16 sm:h-32 bg-gradient-to-t from-[#F2F2F2] to-transparent z-20"></div>
-        </section>
+        
 
         <!-- ============================================================ -->
         <!-- FEATURED EVENTS / CTA SECTION -->
@@ -658,7 +553,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                         <div class="relative">
                             <div class="absolute -top-4 -left-4 w-full h-full rounded-2xl border-2 border-[#F57C00]/30"></div>
                             <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=800&auto=format&fit=crop"
+                                <img src=""
                                     alt="Mujer Valiente 6K" 
                                     class="w-full h-64 sm:h-80 lg:h-96 object-cover"
                                     loading="lazy" />
@@ -782,13 +677,6 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
 
 .animate-bounce-slow {
     animation: bounce-slow 2s ease-in-out infinite;
-}
-
-.main-title-gradient {
-    background: linear-gradient(135deg, rgba(255, 224, 138, 0.95), rgba(245, 124, 0, 0.78), rgba(211, 47, 47, 0.62));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 /* ============================================================ */
@@ -1003,6 +891,14 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
     will-change: transform;
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
+}
+
+.main-title-gradient {
+    background: linear-gradient(135deg, rgba(255, 224, 138, 0.95), rgba(245, 124, 0, 0.78), rgba(211, 47, 47, 0.62));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: left;
 }
 
 /* ============================================================ */
