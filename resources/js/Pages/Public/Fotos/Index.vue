@@ -66,9 +66,10 @@
                         >
                             <div class="thumbnail-container bg-gray-100 relative">
                                 <img
-                                    :src="foto.url_visualizacion"
+                                    :src="foto.url_visualizacion_directa || foto.url_visualizacion"
                                     :alt="`Foto dorsal ${foto.dorsal}`"
                                     class="w-full h-full object-cover"
+                                    @error="handleImageError"
                                 />
                             </div>
                             <div class="p-4">
@@ -101,7 +102,7 @@
 
                 <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 modal-image">
                     <img
-                        :src="selectedFoto.url_visualizacion"
+                        :src="selectedFoto.url_visualizacion_directa || selectedFoto.url_visualizacion"
                         :alt="`Foto dorsal ${selectedFoto.dorsal}`"
                         class="w-full h-auto max-w-full object-contain"
                     />
@@ -181,6 +182,10 @@ const openModal = (foto) => {
 
 const downloadFoto = (fotoId) => {
     window.open(route('fotos.public.download', fotoId), '_blank');
+};
+
+const handleImageError = (event) => {
+    event.target.src = 'https://placehold.co/400x300/png?text=Sin+imagen';
 };
 </script>
 

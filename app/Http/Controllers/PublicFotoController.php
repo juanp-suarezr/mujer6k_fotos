@@ -20,7 +20,6 @@ class PublicFotoController extends Controller
         ];
 
         if ($request->filled('dorsal')) {
-            
             $query = Foto::with(['evento', 'corredor'])
                 ->where('estado', 'disponible')
                 ->where('dorsal', (int) $request->dorsal);
@@ -31,8 +30,10 @@ class PublicFotoController extends Controller
                 $query->where('evento_id', (int) $request->evento_id);
             }
 
-
-            $fotos = $query->get();
+            $fotos = $query->get()->map(function ($foto) {
+                $foto->url_visualizacion_directa = $this->getGoogleDriveDirectUrl($foto->google_drive_file_id);
+                return $foto;
+            });
         }
 
         return Inertia::render('Public/Fotos/Index', [
@@ -59,4 +60,15 @@ class PublicFotoController extends Controller
 
         abort(404);
     }
+
+    private function getGoogleDriveDirectUrl($fileId)
+    {
+        if (!$fileId) {
+            return null;
+        }
+
+        // URL para visualización directa de imágenes en Google Drive
+        return "https://lh3.googleusercontent.com/d/{$fileId}";
+    }
+
 }
