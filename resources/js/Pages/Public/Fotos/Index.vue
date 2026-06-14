@@ -116,6 +116,7 @@ import { ref, computed } from 'vue';
 import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import axios from 'axios';
 
 AOS.init();
 
@@ -157,7 +158,8 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    router.get(route('fotos.public.download', fotoId));
+    
+    axios.get(route('fotos.public.download', fotoId));
 };
 
 const goHome = () => {
