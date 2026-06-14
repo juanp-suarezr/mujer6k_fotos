@@ -1,0 +1,1 @@
+import{a as e,o as t,t as o,X as l}from"./app-DUwrwPkR.js";const n={class:"block text-sm text-parrafo"},r={key:0},c={key:1},u={__name:"InputLabel",props:["value"],setup(a){return(s,_)=>(t(),e("label",n,[a.value?(t(),e("span",r,o(a.value),1)):(t(),e("span",c,[l(s.$slots,"default")]))]))}};export{u as _};
