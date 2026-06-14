@@ -56,7 +56,7 @@ class PublicFotoController extends Controller
         abort(404);
     }
 
-    public function sinDorsal()
+    public function sinDorsal(Request $request)
     {
         $eventos = Evento::select('id', 'nombre')->get();
 
@@ -66,8 +66,7 @@ class PublicFotoController extends Controller
                 $query->whereNull('dorsal')
                     ->orWhere('dorsal', '');
             })
-            ->limit(50)
-            ->get();
+            ->paginate(50);
 
         return Inertia::render('Public/Fotos/SinDorsal', [
             'eventos' => $eventos,

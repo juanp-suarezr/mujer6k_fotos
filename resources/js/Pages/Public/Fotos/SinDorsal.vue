@@ -13,14 +13,14 @@
                 </div>
 
                 <!-- Results Section -->
-                <div v-if="fotos.length > 0" data-aos="fade-up" data-aos-delay="200">
+                <div v-if="fotos.data.length > 0" data-aos="fade-up" data-aos-delay="200">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                        Galería ({{ fotos.length }} fotos)
+                        Galería ({{ fotos.total }} fotos)
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         <div
-                            v-for="foto in fotos"
+                            v-for="foto in fotos.data"
                             :key="foto.id"
                             class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow group tilt-card"
                         >
@@ -46,6 +46,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <Pagination :links="fotos.links" class="mt-6" />
                 </div>
 
                 <div v-else class="text-center py-12" data-aos="fade-up">
@@ -70,9 +72,11 @@
 
 <script setup>
 import PageLayout from '@/Layouts/PageLayout.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import { PhotoIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline';
+import Pagination from '@/Components/Pagination.vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -84,8 +88,8 @@ defineProps({
         required: true,
     },
     fotos: {
-        type: Array,
-        default: () => [],
+        type: Object,
+        required: true,
     },
 });
 
