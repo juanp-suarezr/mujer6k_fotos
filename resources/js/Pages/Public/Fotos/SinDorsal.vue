@@ -42,7 +42,9 @@
                                 <PrimaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
                                     Ver Foto
                                 </PrimaryButton>
-                                
+                                <PrimaryButton @click="downloadFoto(foto.id)" class="flex-1 text-xs">
+                                    Descargar
+                                </PrimaryButton>
                             </div>
                         </div>
                     </div>
@@ -75,7 +77,7 @@ import PageLayout from '@/Layouts/PageLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
-import { PhotoIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline';
+import { PhotoIcon, ArrowLeftIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
 import Pagination from '@/Components/Pagination.vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -115,10 +117,13 @@ onMounted(async () => {
 
 const viewFoto = (foto) => {
     if (foto.google_drive_file_id) {
-        // Usar el visor embebido de Google Drive (funciona sin autenticación para archivos públicos)
         const viewerUrl = `https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`;
         window.open(viewerUrl, '_blank');
     }
+};
+
+const downloadFoto = (fotoId) => {
+    window.open(route('fotos.public.download', fotoId), '_blank');
 };
 
 </script>

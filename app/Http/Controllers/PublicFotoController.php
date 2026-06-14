@@ -53,6 +53,11 @@ class PublicFotoController extends Controller
             return redirect()->away($foto->url_descarga);
         }
 
+        if ($foto->google_drive_file_id) {
+            $downloadUrl = 'https://drive.usercontent.google.com/u/0/uc?id=' . $foto->google_drive_file_id . '&export=download';
+            return redirect()->away($downloadUrl);
+        }
+
         abort(404);
     }
 

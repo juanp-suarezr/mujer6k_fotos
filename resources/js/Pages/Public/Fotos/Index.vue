@@ -158,7 +158,7 @@ const downloadFoto = (fotoId) => {
 };
 
 const goHome = () => {
-    window.location.href = route('home');
+    window.location.href = route('welcome');
 };
 
 </script>
