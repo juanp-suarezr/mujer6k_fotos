@@ -24,14 +24,10 @@
                             :key="foto.id"
                             class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow group tilt-card"
                         >
-                            <div class="thumbnail-container bg-gray-200 relative overflow-hidden">
+                            <div class="thumbnail-container bg-gray-200 relative">
                                 <div class="w-full h-full flex items-center justify-center">
-                                    <PhotoIcon class="h-12 w-12 text-gray-400 group-hover:scale-110 transition-transform" />
-                                </div>
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-3">
-                                    <span class="text-white text-xs font-medium px-2 py-1 bg-black/50 rounded">
-                                        Click para ver
-                                    </span>
+                                    <!-- <PhotoIcon class="h-12 w-12 text-gray-400" /> -->
+                                    <iframe :src="`https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`" width="100%" height="100%"></iframe>
                                 </div>
                             </div>
                             <div class="p-4">
@@ -41,6 +37,12 @@
                                 <p class="text-xs text-gray-400">
                                     {{ foto.nombre_archivo }}
                                 </p>
+                            </div>
+                            <div class="px-4 pb-4 flex gap-2">
+                                <PrimaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
+                                    Ver Foto
+                                </PrimaryButton>
+                                
                             </div>
                         </div>
                     </div>
@@ -106,6 +108,15 @@ onMounted(async () => {
         // vanilla-tilt not available, skip
     }
 });
+
+const viewFoto = (foto) => {
+    if (foto.google_drive_file_id) {
+        // Usar el visor embebido de Google Drive (funciona sin autenticación para archivos públicos)
+        const viewerUrl = `https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`;
+        window.open(viewerUrl, '_blank');
+    }
+};
+
 </script>
 
 <style scoped>
