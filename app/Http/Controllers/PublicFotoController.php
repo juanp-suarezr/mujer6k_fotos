@@ -51,10 +51,6 @@ class PublicFotoController extends Controller
             abort(404);
         }
 
-        if ($foto->url_descarga) {
-            return redirect()->away($foto->url_descarga);
-        }
-
         if (!$foto->google_drive_file_id) {
             abort(404);
         }
@@ -150,54 +146,6 @@ class PublicFotoController extends Controller
         }
     }
 
-
-        if (!$foto->google_drive_file_id) {
-            abort(404);
-        }
-
-        $tempDir = storage_path('app/temp');
-        if (!file_exists($tempDir)) {
-            mkdir($tempDir, 0755, true);
-        }
-
-        $filename = $foto->nombre_archivo ?: ($foto->id . '.jpg');
-        $tempPath = $tempDir . '/foto_' . $foto->id . '_' . time() . '.tmp';
-
-        try {
-            $drive = $googleClient->getDrive();
-            $response = $drive->files->get($foto->google_drive_file_id, [
-                'alt' => 'media',
-            ]);
-
-            if ($response->getStatusCode() === 200) {
-                $body = $response->getBody();
-                file_put_contents($tempPath, $body->getContents());
-                $contentType = $response->getHeaderLine('Content-Type') ?: ($foto->mime_type ?: 'image/jpeg');
-
-                if (file_exists($tempPath) && filesize($tempPath) > 0) {
-                    return response()->download($tempPath, basename($filename), [
-                        'Content-Type' => $contentType,
-                    ])->deleteFileAfterSend(true);
-                }
-            }
-        } catch (\Exception $e) {
-            logger()->warning('Fallo descarga con SDK de Google Drive.', [
-                'foto_id' => $foto->id,
-                'file_id' => $foto->google_drive_file_id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        if (file_exists($tempPath)) {
-            @unlink($tempPath);
-        }
-
-        return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
-    }
-
-        
-
-        
     public function sinDorsal(Request $request)
     {
         $eventos = Evento::select('id', 'nombre')->get();
