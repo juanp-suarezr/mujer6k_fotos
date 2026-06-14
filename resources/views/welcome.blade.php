@@ -3,8 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="keywords" content="Mujer valiente 6K, fotografía, Pereira">
-        <meta name="description" content="Fotografías de la carrera Mujer valiente 6K">
+        <meta name="keywords" content="Mujer valiente 6K, fotografía, Pereira, carrera en Pereira, mujer segura, Mujer valiente">
+        <meta name="description" content="Fotografías de la carrera Mujer valiente 6K Pereira">
         <meta name="author" content="M.Sc.&#169; Alcaldía de Pereira - Taytech">
         <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
         <!-- Incluye stats.js desde un CDN en index.html -->
