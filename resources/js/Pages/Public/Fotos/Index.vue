@@ -157,12 +157,7 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    const link = document.createElement('a');
-    link.href = route('fotos.public.download', fotoId);
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    window.open(route('fotos.public.download', fotoId), '_blank');
 };
 
 const goHome = () => {

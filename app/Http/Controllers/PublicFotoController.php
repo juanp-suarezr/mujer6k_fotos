@@ -56,40 +56,77 @@ class PublicFotoController extends Controller
         }
 
         if ($foto->google_drive_file_id) {
+            // 1. Intentar descargar usando el SDK autenticado
             try {
                 $drive = $googleClient->getDrive();
                 $response = $drive->files->get($foto->google_drive_file_id, [
                     'alt' => 'media',
                 ]);
 
-                $stream = $response->getBody();
-                $contentType = $response->getHeaderLine('Content-Type') ?: ($foto->mime_type ?: 'image/jpeg');
-                $contentLength = $response->getHeaderLine('Content-Length');
-                $filename = $foto->nombre_archivo ?: ($foto->id . '.jpg');
+                if ($response->getStatusCode() === 200) {
+                    $stream = $response->getBody();
+                    $contentType = $response->getHeaderLine('Content-Type') ?: ($foto->mime_type ?: 'image/jpeg');
+                    $contentLength = $response->getHeaderLine('Content-Length');
+                    $filename = $foto->nombre_archivo ?: ($foto->id . '.jpg');
 
-                $headers = [
-                    'Content-Type' => $contentType,
-                    'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
-                ];
+                    $headers = [
+                        'Content-Type' => $contentType,
+                        'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
+                    ];
 
-                if ($contentLength) {
-                    $headers['Content-Length'] = $contentLength;
-                }
-
-                return response()->stream(function () use ($stream) {
-                    while (!$stream->eof()) {
-                        echo $stream->read(1024 * 8);
+                    if ($contentLength) {
+                        $headers['Content-Length'] = $contentLength;
                     }
-                }, 200, $headers);
+
+                    return response()->stream(function () use ($stream) {
+                        while (!$stream->eof()) {
+                            echo $stream->read(1024 * 8);
+                        }
+                    }, 200, $headers);
+                } else {
+                    throw new \RuntimeException('Respuesta no exitosa del SDK de Google Drive con código: ' . $response->getStatusCode());
+                }
             } catch (\Exception $e) {
-                logger()->error('Error downloading from Google Drive: ' . $e->getMessage(), [
+                logger()->warning('Fallo descarga con SDK de Google Drive. Intentando método alternativo público.', [
                     'foto_id' => $foto->id,
                     'file_id' => $foto->google_drive_file_id,
-                    'exception' => $e
+                    'error' => $e->getMessage()
                 ]);
-
-                return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
             }
+
+            // 2. Método alternativo: Descarga pública con confirm=t (para evitar advertencia de virus)
+            try {
+                $url = 'https://drive.google.com/uc?export=download&id=' . $foto->google_drive_file_id . '&confirm=t';
+
+                $response = Http::timeout(45)
+                    ->followRedirects(true)
+                    ->get($url);
+
+                if ($response->successful()) {
+                    $contentType = $response->header('Content-Type');
+                    $body = $response->body();
+
+                    $startsWithHtml = str_starts_with(ltrim($body), '<');
+                    $isHtml = str_contains($contentType ?? '', 'text/html');
+
+                    if (!$isHtml && !$startsWithHtml) {
+                        $filename = $foto->nombre_archivo ?: ($foto->id . '.jpg');
+                        return response($body, 200, [
+                            'Content-Type' => $contentType ?: 'image/jpeg',
+                            'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
+                        ]);
+                    } else {
+                        logger()->warning('El método alternativo retornó HTML en lugar de imagen para la foto ' . $foto->id);
+                    }
+                }
+            } catch (\Exception $e) {
+                logger()->error('Error en método alternativo de descarga de Google Drive: ' . $e->getMessage(), [
+                    'foto_id' => $foto->id
+                ]);
+            }
+
+            // 3. Fallback final: Redirigir a la URL de descarga directa de Google Drive
+            return redirect()->away('https://drive.google.com/uc?export=download&id=' . $foto->google_drive_file_id);
         }
 
         abort(404);
