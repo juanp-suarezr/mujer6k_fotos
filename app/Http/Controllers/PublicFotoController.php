@@ -51,10 +51,6 @@ class PublicFotoController extends Controller
             abort(404);
         }
 
-        if ($foto->url_descarga) {
-            return redirect()->away($foto->url_descarga);
-        }
-
         if ($foto->google_drive_file_id) {
             // 1. Intentar descargar usando el SDK autenticado
             try {
@@ -127,6 +123,10 @@ class PublicFotoController extends Controller
 
             // 3. Fallback final: Redirigir a la URL de descarga directa de Google Drive
             return redirect()->away('https://drive.google.com/uc?export=download&id=' . $foto->google_drive_file_id);
+        }
+
+        if ($foto->url_descarga) {
+            return redirect()->away($foto->url_descarga);
         }
 
         abort(404);
