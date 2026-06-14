@@ -83,10 +83,10 @@
 
                             <div class="px-4 pb-4 flex gap-2">
                                 <SecondaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
-                                    <EyeIcon class="h-5 w-5 mr-2 flex text-center" />
+                                    <EyeIcon class="h-5 w-full mr-2 flex text-center" />
                                 </SecondaryButton>
-                                <SecondaryButton @click="downloadFoto(foto)" class="flex-1 text-xs">
-                                    <ArrowDownTrayIcon class="h-5 w-5 mr-2 text-center" />
+                                <SecondaryButton @click="downloadFoto(foto.id)" class="flex-1 text-xs">
+                                    <ArrowDownTrayIcon class="h-5 w-full mr-2 text-center" />
                                 </SecondaryButton>
                                 
                             </div>

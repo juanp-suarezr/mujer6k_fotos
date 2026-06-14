@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Foto;
 use App\Models\Evento;
+use App\Services\GoogleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
@@ -44,7 +45,7 @@ class PublicFotoController extends Controller
         return $this->index($request);
     }
 
-    public function download(Foto $foto, Request $request)
+    public function download(Foto $foto, GoogleClient $googleClient, Request $request)
     {
         if ($foto->estado !== 'disponible') {
             abort(404);
@@ -56,41 +57,39 @@ class PublicFotoController extends Controller
 
         if ($foto->google_drive_file_id) {
             try {
-                $url = 'https://drive.usercontent.google.com/u/0/uc?id=' . $foto->google_drive_file_id . '&export=download';
+                $drive = $googleClient->getDrive();
+                $response = $drive->files->get($foto->google_drive_file_id, [
+                    'alt' => 'media',
+                ]);
+
+                $stream = $response->getBody();
+                $contentType = $response->getHeaderLine('Content-Type') ?: ($foto->mime_type ?: 'image/jpeg');
+                $contentLength = $response->getHeaderLine('Content-Length');
+                $filename = $foto->nombre_archivo ?: ($foto->id . '.jpg');
 
                 $headers = [
-                    'User-Agent' => $request->header('User-Agent') ?: 'Mozilla/5.0',
-                    'Accept' => $request->header('Accept') ?: '*/*',
+                    'Content-Type' => $contentType,
+                    'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
                 ];
 
-                $response = Http::timeout(45)
-                    ->withHeaders($headers)
-                    ->followRedirects(true, 20)
-                    ->get($url);
-
-                if ($response->successful()) {
-                    $contentType = $response->headers('Content-Type');
-                    $body = ltrim($response->body());
-                    $filename = $foto->nombre_archivo ?: 'download';
-
-                    $startsWithHtml = str_starts_with($body, '<');
-                    $startsWithJson = str_starts_with($body, '{') || str_starts_with($body, '[');
-                    $isHtml = str_contains($contentType ?? '', 'text/html');
-
-                    if ($isHtml || $startsWithHtml || $startsWithJson) {
-                        return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
-                    }
-
-                    return response($response->body(), 200, [
-                        'Content-Type' => $contentType ?: 'application/octet-stream',
-                        'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
-                    ]);
+                if ($contentLength) {
+                    $headers['Content-Length'] = $contentLength;
                 }
+
+                return response()->stream(function () use ($stream) {
+                    while (!$stream->eof()) {
+                        echo $stream->read(1024 * 8);
+                    }
+                }, 200, $headers);
             } catch (\Exception $e) {
+                logger()->error('Error downloading from Google Drive: ' . $e->getMessage(), [
+                    'foto_id' => $foto->id,
+                    'file_id' => $foto->google_drive_file_id,
+                    'exception' => $e
+                ]);
+
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
             }
-
-            return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
         }
 
         abort(404);
