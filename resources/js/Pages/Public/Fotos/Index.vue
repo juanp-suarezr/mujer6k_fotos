@@ -61,21 +61,25 @@
                         <div
                             v-for="foto in fotos"
                             :key="foto.id"
-                            class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                            @click="openModal(foto)"
+                            class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
                         >
-                            <div class="thumbnail-container bg-gray-100 relative">
-                                <img
-                                    :src="foto.url_visualizacion_directa || foto.url_visualizacion"
-                                    :alt="`Foto dorsal ${foto.dorsal}`"
-                                    class="w-full h-full object-cover"
-                                    @error="handleImageError"
-                                />
+                            <div class="thumbnail-container bg-gray-200 relative">
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <!-- <PhotoIcon class="h-12 w-12 text-gray-400" /> -->
+                                    <iframe :src="`https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`" width="100%" height="100%"></iframe>
+                                </div>
                             </div>
                             <div class="p-4">
                                 <p class="font-medium text-gray-800">Dorsal #{{ foto.dorsal }}</p>
                                 <p class="text-sm text-gray-500">{{ foto.corredor?.nombre_completo || '' }}</p>
                                 <p class="text-xs text-gray-400">{{ foto.evento?.nombre }}</p>
+                            </div>
+
+                            <div class="px-4 pb-4 flex gap-2">
+                                <PrimaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
+                                    Ver Foto
+                                </PrimaryButton>
+                                
                             </div>
                         </div>
                     </div>
@@ -87,44 +91,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Photo Modal -->
-        <Modal :show="showModal" @close="showModal = false" max-width="4xl">
-            <div v-if="selectedFoto" class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">
-                        Foto - Dorsal #{{ selectedFoto.dorsal }}
-                    </h3>
-                    <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">
-                        <XMarkIcon class="h-6 w-6" />
-                    </button>
-                </div>
-
-                <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 modal-image">
-                    <img
-                        :src="selectedFoto.url_visualizacion_directa || selectedFoto.url_visualizacion"
-                        :alt="`Foto dorsal ${selectedFoto.dorsal}`"
-                        class="w-full h-auto max-w-full object-contain"
-                    />
-                </div>
-
-                <div class="mb-4">
-                    <p class="text-gray-600"><span class="font-medium">Corredor:</span> {{ selectedFoto.corredor?.nombre_completo || 'No registrado' }}</p>
-                    <p class="text-gray-600"><span class="font-medium">Evento:</span> {{ selectedFoto.evento?.nombre }}</p>
-                    <p class="text-gray-600"><span class="font-medium">Archivo:</span> {{ selectedFoto.nombre_archivo }}</p>
-                </div>
-
-                <div class="flex justify-end gap-3">
-                    <SecondaryButton @click="showModal = false">
-                        Cerrar
-                    </SecondaryButton>
-                    <PrimaryButton @click="downloadFoto(selectedFoto.id)">
-                        <ArrowDownTrayIcon class="h-5 w-5 mr-2" />
-                        Descargar
-                    </PrimaryButton>
-                </div>
-            </div>
-        </Modal>
     </PageLayout>
 </template>
 
@@ -138,7 +104,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { MagnifyingGlassIcon, PhotoIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -166,8 +132,6 @@ const form = useForm({
 
 const fotos = computed(() => props.fotos);
 const searchPerformed = computed(() => props.filters.dorsal !== '' || props.filters.evento_id !== '');
-const showModal = ref(false);
-const selectedFoto = ref(null);
 
 const searchFotos = () => {
     form.get(route('fotos.public.search'), {
@@ -175,25 +139,21 @@ const searchFotos = () => {
     });
 };
 
-const openModal = (foto) => {
-    selectedFoto.value = foto;
-    showModal.value = true;
+const viewFoto = (foto) => {
+    if (foto.google_drive_file_id) {
+        // Usar el visor embebido de Google Drive (funciona sin autenticación para archivos públicos)
+        const viewerUrl = `https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`;
+        window.open(viewerUrl, '_blank');
+    }
 };
 
 const downloadFoto = (fotoId) => {
     window.open(route('fotos.public.download', fotoId), '_blank');
-};
-
-const handleImageError = (event) => {
-    event.target.src = 'https://placehold.co/400x300/png?text=Sin+imagen';
 };
 </script>
 
 <style scoped>
 .thumbnail-container {
     aspect-ratio: 4/3;
-}
-.modal-image {
-    max-height: 70vh;
 }
 </style>
