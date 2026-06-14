@@ -159,7 +159,12 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    window.open('https://drive.usercontent.google.com/u/0/uc?id=' +fotoId +'&export=download', '_blank');
+    const link = document.createElement('a');
+    link.href = route('fotos.public.download', fotoId);
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 };
 
 const goHome = () => {
