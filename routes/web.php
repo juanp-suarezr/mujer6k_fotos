@@ -57,6 +57,7 @@ Route::middleware('guest')->group(function () {
 Route::get('/buscar-fotos', [\App\Http\Controllers\PublicFotoController::class, 'index'])->name('fotos.public.index');
 Route::get('/fotos/buscar', [\App\Http\Controllers\PublicFotoController::class, 'search'])->name('fotos.public.search');
 Route::get('/fotos/{foto}/descargar', [\App\Http\Controllers\PublicFotoController::class, 'download'])->name('fotos.public.download');
+Route::get('/fotos-sin-dorsal', [\App\Http\Controllers\PublicFotoController::class, 'sinDorsal'])->name('fotos.public.sin-dorsal');
 
 Route::middleware(['auth'])->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
