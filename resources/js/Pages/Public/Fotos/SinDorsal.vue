@@ -27,7 +27,7 @@
                             <div class="thumbnail-container bg-gray-200 relative">
                                 <div class="w-full h-full flex items-center justify-center">
                                     <!-- <PhotoIcon class="h-12 w-12 text-gray-400" /> -->
-                                    <iframe class="cursor-none scrollbar-hide no-controls z-0" :src="`https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`" width="100%" height="100%"></iframe>
+                                    <iframe class="cursor-none pointer-events-none" loading="lazy" :src="`https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`" width="100%" height="100%"></iframe>
                                 </div>
                             </div>
                             <div class="p-4">
