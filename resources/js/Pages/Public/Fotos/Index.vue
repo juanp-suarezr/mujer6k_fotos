@@ -64,7 +64,7 @@
                             class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                             @click="openModal(foto)"
                         >
-                            <div class="aspect-video bg-gray-100 relative">
+                            <div class="thumbnail-container bg-gray-100 relative">
                                 <img
                                     :src="foto.url_visualizacion"
                                     :alt="`Foto dorsal ${foto.dorsal}`"
@@ -99,11 +99,11 @@
                     </button>
                 </div>
 
-                <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
+                <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 modal-image">
                     <img
                         :src="selectedFoto.url_visualizacion"
                         :alt="`Foto dorsal ${selectedFoto.dorsal}`"
-                        class="w-full h-full object-contain"
+                        class="w-full h-auto max-w-full object-contain"
                     />
                 </div>
 
@@ -185,7 +185,10 @@ const downloadFoto = (fotoId) => {
 </script>
 
 <style scoped>
-.aspect-video {
-    aspect-ratio: 16/9;
+.thumbnail-container {
+    aspect-ratio: 4/3;
+}
+.modal-image {
+    max-height: 70vh;
 }
 </style>

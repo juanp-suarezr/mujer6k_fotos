@@ -20,13 +20,17 @@ class PublicFotoController extends Controller
         ];
 
         if ($request->filled('dorsal')) {
+            
             $query = Foto::with(['evento', 'corredor'])
-                ->where('estado', 'procesada')
-                ->where('dorsal', $request->dorsal);
+                ->where('estado', 'disponible')
+                ->where('dorsal', (int) $request->dorsal);
+
+            
 
             if ($request->filled('evento_id')) {
-                $query->where('evento_id', $request->evento_id);
+                $query->where('evento_id', (int) $request->evento_id);
             }
+
 
             $fotos = $query->get();
         }
