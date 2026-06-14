@@ -83,11 +83,11 @@
 
                             <div class="px-4 pb-4 flex gap-2">
                                 <SecondaryButton @click="viewFoto(foto)" class="flex-1 text-xs">
-                                    <EyeIcon class="h-5 w-5 mr-2" />
+                                    <EyeIcon class="h-5 w-5 mr-2 flex text-center" />
                                     
                                 </SecondaryButton>
                                 <SecondaryButton @click="downloadFoto(foto)" class="flex-1 text-xs">
-                                    <ArrowDownTrayIcon class="h-5 w-5 mr-2" />
+                                    <ArrowDownTrayIcon class="h-5 w-5 mr-2 text-center" />
                                     
                                 </SecondaryButton>
                                 
@@ -115,7 +115,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
@@ -159,7 +159,7 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    window.open(route('fotos.public.download', fotoId), '_blank');
+    window.open('https://drive.usercontent.google.com/u/0/uc?id=' +fotoId +'&export=download', '_blank');
 };
 
 const goHome = () => {
