@@ -68,14 +68,21 @@ class ImportarEventoDriveJob implements ShouldQueue
         $totalFolders = 0;
 
         $driveService->paginateFolders($this->carpetaDriveId, [], function ($folder) use (&$totalFolders, $importacion): void {
-            $dorsal = trim((string) $folder->getName());
+            $name = trim((string) $folder->getName());
+            $normalized = strtolower(str_replace(' ', '', $name));
 
-            if (!preg_match('/^\d+$/', $dorsal)) {
+            if (preg_match('/^sindorsal$/', $normalized)) {
+                $totalFolders++;
+                SyncDorsalJob::dispatch($importacion->id, $folder->getId(), null);
+                return;
+            }
+
+            if (!preg_match('/^\d+$/', $name)) {
                 return;
             }
 
             $totalFolders++;
-            SyncDorsalJob::dispatch($importacion->id, $folder->getId(), $dorsal);
+            SyncDorsalJob::dispatch($importacion->id, $folder->getId(), $name);
         });
 
         return $totalFolders;

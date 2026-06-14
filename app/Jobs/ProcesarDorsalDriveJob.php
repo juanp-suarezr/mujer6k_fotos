@@ -26,15 +26,19 @@ class ProcesarDorsalDriveJob implements ShouldQueue
     public function __construct(
         public int $importacionId,
         public string $folderId,
-        public string $dorsal
+        public ?string $dorsal
     ) {}
 
     public function handle(GoogleDriveService $driveService, SyncService $syncService): void
     {
         $importacion = Importacion::findOrFail($this->importacionId);
-        $corredor = Corredor::where('evento_id', $importacion->evento_id)
-            ->where('dorsal', $this->dorsal)
-            ->first();
+        $corredor = null;
+
+        if ($this->dorsal !== null) {
+            $corredor = Corredor::where('evento_id', $importacion->evento_id)
+                ->where('dorsal', $this->dorsal)
+                ->first();
+        }
 
         $processed = 0;
 
@@ -61,7 +65,7 @@ $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveSe
                 'mime_type' => $file->getMimeType(),
                 'tamano_archivo' => $file->getSize() ?? 0,
                 'size' => $file->getSize() ?? 0,
-                'ruta_logica' => "{$importacion->evento_id}/{$this->dorsal}/{$file->getName()}",
+                'ruta_logica' => $this->rutaLogica($importacion->evento_id, $this->dorsal, $file->getName()),
                 'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($file->getId()),
                 'url_descarga' => null,
                 'estado' => FotoEstado::Disponible->value,
@@ -115,5 +119,12 @@ $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveSe
         $importacion->increment('errores');
 
         app(SyncService::class)->fail($importacion, $exception);
+    }
+
+    protected function rutaLogica(int $eventoId, ?string $dorsal, string $fileName): string
+    {
+        $dorsalSegment = $dorsal ?? 'na';
+
+        return "{$eventoId}/{$dorsalSegment}/{$fileName}";
     }
 }

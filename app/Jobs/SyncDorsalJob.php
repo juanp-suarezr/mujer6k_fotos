@@ -28,15 +28,19 @@ class SyncDorsalJob implements ShouldQueue
     public function __construct(
         public int $importacionId,
         public string $folderId,
-        public string $dorsal
+        public ?string $dorsal
     ) {}
 
     public function handle(GoogleDriveService $driveService, SyncService $syncService): void
     {
         $importacion = Importacion::findOrFail($this->importacionId);
-        $corredor = Corredor::where('evento_id', $importacion->evento_id)
-            ->where('dorsal', $this->dorsal)
-            ->first();
+        $corredor = null;
+
+        if ($this->dorsal !== null) {
+            $corredor = Corredor::where('evento_id', $importacion->evento_id)
+                ->where('dorsal', $this->dorsal)
+                ->first();
+        }
 
         $processed = 0;
 
@@ -119,8 +123,10 @@ $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveSe
         app(SyncService::class)->fail($importacion, $exception);
     }
 
-    protected function rutaLogica(int $eventoId, string $dorsal, string $fileName): string
+    protected function rutaLogica(int $eventoId, ?string $dorsal, string $fileName): string
     {
-        return "{$eventoId}/{$dorsal}/{$fileName}";
+        $dorsalSegment = $dorsal ?? 'na';
+
+        return "{$eventoId}/{$dorsalSegment}/{$fileName}";
     }
 }
