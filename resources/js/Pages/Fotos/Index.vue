@@ -66,6 +66,16 @@
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center justify-center gap-2">
+                    <a
+                      v-if="foto.url_visualizacion"
+                      :href="foto.url_visualizacion"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center justify-center p-2 text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition"
+                      title="Ver foto"
+                    >
+                      <EyeIcon class="h-4 w-4" />
+                    </a>
                     <Link
                       :href="route('fotos.edit', foto.id)"
                       class="inline-flex items-center justify-center p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition"
@@ -123,9 +133,9 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import Pagination from '@/Components/Pagination.vue';
 import Modal from '@/Components/Modal.vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import { PencilIcon, TrashIcon, PhotoIcon } from '@heroicons/vue/24/solid';
+import { PencilIcon, TrashIcon, PhotoIcon, EyeIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   fotos: { type: Object, required: true },
