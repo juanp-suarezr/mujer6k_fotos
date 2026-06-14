@@ -9,7 +9,13 @@
                     <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">
                         Consulta tus <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-red-600">Fotos</span>
                     </h1>
-                    <p class="text-gray-600">Busca por número de dorsal y evento</p>
+<p class="text-gray-600">Busca por número de dorsal y evento</p>
+                    
+                    <div class="mt-4">
+                        <SecondaryButton @click="goHome">
+                            Volver al Inicio
+                        </SecondaryButton>
+                    </div>
                 </div>
 
                 <!-- Search Form -->
@@ -150,6 +156,11 @@ const viewFoto = (foto) => {
 const downloadFoto = (fotoId) => {
     window.open(route('fotos.public.download', fotoId), '_blank');
 };
+
+const goHome = () => {
+    window.location.href = route('home');
+};
+
 </script>
 
 <style scoped>

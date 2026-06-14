@@ -581,7 +581,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                             Todos los participantes pueden encontrar, descargar y compartir sus fotos oficiales de la carrera. 
                             ¡Tu momento de gloria está a solo un dorsal de distancia!
                         </p>
-                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
+                        <div class="flex flex-wrap gap-4 items-center justify-center lg:justify-start">
                             <a href="#inicio"
                                 class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#F57C00] to-[#D32F2F] text-white font-extrabold text-sm sm:text-base tracking-wider rounded-xl
                                     hover:from-[#FF9800] hover:to-[#E53935] transition-all duration-300 transform hover:scale-105 active:scale-95
