@@ -44,37 +44,50 @@ class PublicFotoController extends Controller
         return $this->index($request);
     }
 
-    public function download(Foto $foto)
+    public function download(Foto $foto, Request $request)
     {
         if ($foto->estado !== 'disponible') {
             abort(404);
         }
 
-        // if ($foto->url_descarga) {
-        //     return redirect()->away($foto->url_descarga);
-        // }
+        if ($foto->url_descarga) {
+            return redirect()->away($foto->url_descarga);
+        }
 
         if ($foto->google_drive_file_id) {
             try {
                 $url = 'https://drive.usercontent.google.com/u/0/uc?id=' . $foto->google_drive_file_id . '&export=download';
 
-                $response = Http::timeout(60)
-                    ->withHeaders([
-                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    ])
+                $headers = [
+                    'User-Agent' => $request->header('User-Agent') ?: 'Mozilla/5.0',
+                    'Accept' => $request->header('Accept') ?: '*/*',
+                ];
+
+                $response = Http::timeout(45)
+                    ->withHeaders($headers)
+                    ->followRedirects(true, 20)
                     ->get($url);
 
                 if ($response->successful()) {
-                    $filename = $foto->nombre_archivo ?: 'download.jpg';
-                    $mimeType = $response->headers('Content-Type') ?: 'application/octet-stream';
+                    $contentType = $response->headers('Content-Type');
+                    $body = ltrim($response->body());
+                    $filename = $foto->nombre_archivo ?: 'download';
+
+                    $startsWithHtml = str_starts_with($body, '<');
+                    $startsWithJson = str_starts_with($body, '{') || str_starts_with($body, '[');
+                    $isHtml = str_contains($contentType ?? '', 'text/html');
+
+                    if ($isHtml || $startsWithHtml || $startsWithJson) {
+                        return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
+                    }
 
                     return response($response->body(), 200, [
-                        'Content-Type' => $mimeType,
+                        'Content-Type' => $contentType ?: 'application/octet-stream',
                         'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
                     ]);
                 }
             } catch (\Exception $e) {
-                // fallback to direct preview if proxy fails
+                return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
             }
 
             return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
@@ -82,6 +95,8 @@ class PublicFotoController extends Controller
 
         abort(404);
     }
+
+        
 
         
     public function sinDorsal(Request $request)
