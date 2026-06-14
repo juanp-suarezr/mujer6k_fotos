@@ -123,29 +123,7 @@ const handleMouseMove = (e) => {
     parallaxOffset.value = { x: x * 8, y: y * 8 };
 };
 
-// --- Typing Animation ---
-const typedText = ref('');
-const fullText = 'CONSULTA TUS FOTOS';
-const isTypingComplete = ref(false);
-const startTyping = () => {
-    let i = 0;
-    typedText.value = '';
-    isTypingComplete.value = false;
-    const interval = setInterval(() => {
-        if (i <= fullText.length) {
-            typedText.value = fullText.slice(0, i);
-            i++;
-        } else {
-            clearInterval(interval);
-            isTypingComplete.value = true;
-        }
-    }, 80);
-    // Restart typing periodically
-    setTimeout(() => {
-        clearInterval(interval);
-        startTyping();
-    }, 8000);
-};
+
 
 
 
@@ -237,9 +215,6 @@ onMounted(async () => {
     } catch (e) {
         console.log('vanilla-tilt not available, using CSS fallback');
     }
-    
-    // Start typing animation after a delay
-    setTimeout(startTyping, 1000);
 });
 
 onBeforeUnmount(() => {
@@ -439,13 +414,10 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                             </span>
                         </div>
 
-                        <!-- Main Title with Typing Animation -->
-                        <h1 class="text-2xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-5xl font-black leading-none text-white mb-1 sm:mb-2"
-                            :class="{ '!text-yellow-200': isContrast }">
-                            <span class="block typing-container">
-                                <span class="typing-text">{{ typedText }}</span>
-                                <span v-if="!isTypingComplete" class="typing-cursor"></span>
-                            </span>
+                        <!-- Main Title -->
+                        <h1 class="main-title-gradient max-w-full min-w-0 text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-black leading-tight mb-1 sm:mb-2 overflow-hidden break-words"
+                            :class="{ '!bg-none !text-yellow-200': isContrast }">
+                            CONSULTA TUS FOTOS
                         </h1>
 
                         <!-- Subtitle with reveal -->
@@ -812,31 +784,8 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
     animation: bounce-slow 2s ease-in-out infinite;
 }
 
-/* ============================================================ */
-/* TYPING ANIMATION */
-/* ============================================================ */
-.typing-container {
-    display: inline;
-    position: relative;
-}
-
-.typing-cursor {
-    display: inline-block;
-    width: 3px;
-    height: 0.8em;
-    background: #FFC107;
-    margin-left: 4px;
-    animation: blink 0.8s step-end infinite;
-    vertical-align: baseline;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-.typing-text {
-    background: linear-gradient(135deg, #FFC107, #F57C00, #D32F2F);
+.main-title-gradient {
+    background: linear-gradient(135deg, rgba(255, 224, 138, 0.95), rgba(245, 124, 0, 0.78), rgba(211, 47, 47, 0.62));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1063,13 +1012,4 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
     font-variant-numeric: tabular-nums;
 }
 
-/* ============================================================ */
-/* RESPONSIVE TWEAKS */
-/* ============================================================ */
-@media (max-width: 640px) {
-    .typing-cursor {
-        width: 2px;
-        height: 0.6em;
-    }
-}
 </style>
