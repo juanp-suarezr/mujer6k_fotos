@@ -53,7 +53,12 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 });
 
-Route::middleware('auth')->group(function () {
+// Rutas públicas para búsqueda de fotos
+Route::get('/buscar-fotos', [\App\Http\Controllers\PublicFotoController::class, 'index'])->name('fotos.public.index');
+Route::get('/fotos/buscar', [\App\Http\Controllers\PublicFotoController::class, 'search'])->name('fotos.public.search');
+Route::get('/fotos/{foto}/descargar', [\App\Http\Controllers\PublicFotoController::class, 'download'])->name('fotos.public.download');
+
+Route::middleware(['auth'])->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', function () {

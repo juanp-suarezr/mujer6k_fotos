@@ -66,11 +66,14 @@ const getLetterSize = size => {
 
 const form = useForm({
     dorsal: '',
+    evento_id: '',
 });
 
 const submitSearch = () => {
     if (form.dorsal.trim()) {
-        window.location.href = route('fotos.index', { dorsal: form.dorsal });
+        form.get(route('fotos.public.search'), {
+            preserveScroll: true,
+        });
     }
 };
 
@@ -96,8 +99,6 @@ const responsiveOptions = ref([
         numScroll: 1
     }
 ]);
-
-const dorsalSearch = ref('');
 
 onMounted(() => {
     AOS.refresh();
@@ -254,7 +255,7 @@ onMounted(() => {
 
                                         <!-- Input Field -->
                                         <input
-                                            v-model="dorsalSearch"
+                                            v-model="form.dorsal"
                                             type="text"
                                             placeholder="Ingresa tu número de dorsal"
                                             class="flex-1 bg-transparent text-white placeholder-gray-400 py-3 sm:py-4 pr-4 text-base sm:text-lg font-medium
