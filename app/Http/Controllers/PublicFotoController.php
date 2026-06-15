@@ -79,7 +79,6 @@ class PublicFotoController extends Controller
                 ->withHeaders([
                     'User-Agent' => $request->header('User-Agent') ?: 'Mozilla/5.0',
                 ])
-                ->followRedirects(true, 20)
                 ->sink($tempPath)
                 ->get($url);
 
