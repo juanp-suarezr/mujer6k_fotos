@@ -84,6 +84,7 @@ class PublicFotoController extends Controller
 
             $httpCode = $response->status();
             $contentType = $response->headers('Content-Type');
+            $contentTypeString = is_array($contentType) ? ($contentType[0] ?? '') : $contentType;
             $fileSize = file_exists($tempPath) ? filesize($tempPath) : 0;
 
             logger()->info('Respuesta recibida de Google Drive', [
@@ -104,11 +105,11 @@ class PublicFotoController extends Controller
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
             }
 
-            if (str_contains($contentType ?? '', 'text/html')) {
+            if (str_contains($contentTypeString ?? '', 'text/html')) {
                 @unlink($tempPath);
                 logger()->warning('Descarga fallida: contenido HTML recibido en lugar de imagen', [
                     'foto_id' => $foto->id,
-                    'content_type' => $contentType,
+                'content_type' => $contentTypeString,
                     'url' => $url,
                 ]);
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
@@ -129,7 +130,7 @@ class PublicFotoController extends Controller
             ]);
 
             return response()->download($tempPath, basename($filename), [
-                'Content-Type' => $contentType ?: 'application/octet-stream',
+                'Content-Type' => $contentTypeString ?: 'application/octet-stream',
             ])->deleteFileAfterSend(true);
         } catch (\Exception $e) {
             if (file_exists($tempPath)) {
