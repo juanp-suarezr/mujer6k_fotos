@@ -30,17 +30,33 @@ class SyncService
 
     public function start(Importacion $importacion): Importacion
     {
-        $importacion->update([
-            'estado' => ImportacionEstado::Pendiente->value,
-            'total_archivos' => 0,
-            'procesados' => 0,
-            'errores' => 0,
-            'total_folders' => 0,
-            'procesados_folders' => 0,
-            'fecha_inicio' => null,
-            'fecha_fin' => null,
-            'last_error' => null,
-        ]);
+        if ($importacion->modo_sync === 'overwrite') {
+            $importacion->update([
+                'estado' => ImportacionEstado::Procesando->value,
+                'fecha_inicio' => now(),
+                'fecha_fin' => null,
+                'last_error' => null,
+                'total_archivos' => 0,
+                'procesados' => 0,
+                'errores' => 0,
+                'total_folders' => 0,
+                'procesados_folders' => 0,
+            ]);
+
+            Foto::where('importacion_id', $importacion->id)->delete();
+        } else {
+            $importacion->update([
+                'estado' => ImportacionEstado::Pendiente->value,
+                'total_archivos' => 0,
+                'procesados' => 0,
+                'errores' => 0,
+                'total_folders' => 0,
+                'procesados_folders' => 0,
+                'fecha_inicio' => null,
+                'fecha_fin' => null,
+                'last_error' => null,
+            ]);
+        }
 
         if ($importacion->origen === 'drive' && $importacion->carpeta_drive_id) {
             try {

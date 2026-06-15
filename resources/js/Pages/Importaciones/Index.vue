@@ -87,16 +87,38 @@
                     >
                       <EyeIcon class="h-4 w-4" />
                     </Link>
-                    <button
-                      v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
-                      @click="syncImportacion(importacion)"
-                      :disabled="syncingId === importacion.id"
-                      class="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="Sincronizar"
-                    >
-                      <ArrowPathIcon v-if="syncingId === importacion.id" class="h-4 w-4 animate-spin" />
-                      <ArrowPathIcon v-else class="h-4 w-4" />
-                    </button>
+                    <div class="flex items-center gap-1">
+                      <button
+                        v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
+                        @click="syncImportacion(importacion, 'incremental')"
+                        :disabled="syncingId === importacion.id"
+                        class="inline-flex items-center justify-center p-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Sincronizar incremental (solo nuevos)"
+                      >
+                        <ArrowPathIcon v-if="syncingId === importacion.id" class="h-4 w-4 animate-spin" />
+                        <ArrowUpIcon v-else class="h-4 w-4" />
+                      </button>
+                      <button
+                        v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
+                        @click="syncImportacion(importacion, 'fill')"
+                        :disabled="syncingId === importacion.id"
+                        class="inline-flex items-center justify-center p-2 text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Rellenar datos"
+                      >
+                        <ArrowRightIcon v-if="syncingId !== importacion.id" class="h-4 w-4" />
+                        <ArrowPathIcon v-if="syncingId === importacion.id" class="h-4 w-4 animate-spin" />
+                      </button>
+                      <button
+                        v-if="importacion.estado !== 'completada' && importacion.estado !== 'procesando'"
+                        @click="syncImportacion(importacion, 'overwrite')"
+                        :disabled="syncingId === importacion.id"
+                        class="inline-flex items-center justify-center p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Sobrescribir todo"
+                      >
+                        <ArrowPathIcon v-if="syncingId === importacion.id" class="h-4 w-4 animate-spin" />
+                        <ArrowUturnLeftIcon v-else class="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -123,7 +145,7 @@ import PrimaryLink from '@/Components/PrimaryLink.vue';
 import Pagination from '@/Components/Pagination.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/solid';
+import { ArrowPathIcon, EyeIcon, DocumentIcon, FolderIcon, ArrowUpIcon, ArrowRightIcon, ArrowUturnLeftIcon } from '@heroicons/vue/24/solid';
 
 const props = defineProps({
   importaciones: { type: Object, required: true },
@@ -138,9 +160,10 @@ const progressPercentage = (importacion) => {
   return Math.min(100, (importacion.procesados / importacion.total_archivos) * 100);
 };
 
-const syncImportacion = (importacion) => {
+const syncImportacion = (importacion, modo = 'incremental') => {
   syncingId.value = importacion.id;
-  router.post(route('importaciones.sync', importacion.id), {}, {
+  const routeName = modo === 'fill' ? 'importaciones.sync.fill' : modo === 'overwrite' ? 'importaciones.sync.overwrite' : 'importaciones.sync';
+  router.post(route(routeName, importacion.id), {}, {
     preserveScroll: true,
     onFinish: () => {
       syncingId.value = null;

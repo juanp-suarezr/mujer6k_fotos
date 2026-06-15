@@ -19,7 +19,7 @@ class ImportacionController extends Controller
     {
         $this->middleware('permission:importaciones-listar|importaciones-crear|importaciones-editar|importaciones-eliminar', ['only' => ['index', 'store']]);
         $this->middleware('permission:importaciones-crear', ['only' => ['create', 'store']]);
-        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update', 'sync', 'progress']]);
+        $this->middleware('permission:importaciones-editar', ['only' => ['edit', 'update', 'sync', 'syncIncremental', 'syncFill', 'syncOverwrite', 'progress']]);
         $this->middleware('permission:importaciones-eliminar', ['only' => ['destroy']]);
     }
 
@@ -106,13 +106,59 @@ class ImportacionController extends Controller
         ])->with('success', 'Importación actualizada correctamente');
     }
 
-    function sync(Importacion $importacion)
+    function sync(Request $request, Importacion $importacion)
     {
+        $request->validate([
+            'modo_sync' => ['nullable', 'string', 'max:32', 'in:incremental,fill,overwrite'],
+        ]);
+
+        if ($request->filled('modo_sync') && $request->input('modo_sync') !== $importacion->modo_sync) {
+            $importacion->update([
+                'modo_sync' => $request->input('modo_sync'),
+            ]);
+        }
+
         try {
             $this->syncService->start($importacion);
 
             return redirect()->route('importaciones.index')
                 ->with('success', 'Sincronización iniciada');
+        } catch (\RuntimeException $e) {
+            return redirect()->route('importaciones.index')
+                ->with('error', $e->getMessage());
+        } catch (\Google\Service\Exception $e) {
+            $errorMsg = 'Error de Google Drive (HTTP ' . $e->getCode() . '): ' . $e->getMessage();
+            return redirect()->route('importaciones.index')
+                ->with('error', $errorMsg);
+        }
+    }
+
+    function syncIncremental(Importacion $importacion)
+    {
+        return $this->doSync($importacion, 'incremental');
+    }
+
+    function syncFill(Importacion $importacion)
+    {
+        return $this->doSync($importacion, 'fill');
+    }
+
+    function syncOverwrite(Importacion $importacion)
+    {
+        return $this->doSync($importacion, 'overwrite');
+    }
+
+    protected function doSync(Importacion $importacion, string $modo): \Illuminate\Http\RedirectResponse
+    {
+        if ($importacion->modo_sync !== $modo) {
+            $importacion->update(['modo_sync' => $modo]);
+        }
+
+        try {
+            $this->syncService->start($importacion);
+
+            return redirect()->route('importaciones.index')
+                ->with('success', 'Sincronización iniciada en modo ' . $modo);
         } catch (\RuntimeException $e) {
             return redirect()->route('importaciones.index')
                 ->with('error', $e->getMessage());

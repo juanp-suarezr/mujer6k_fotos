@@ -93,6 +93,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::post('importaciones/{importacion}/sync', [ImportacionController::class, 'sync'])->name('importaciones.sync');
+    Route::post('importaciones/{importacion}/sync-incremental', [ImportacionController::class, 'syncIncremental'])->name('importaciones.sync.incremental');
+    Route::post('importaciones/{importacion}/sync-fill', [ImportacionController::class, 'syncFill'])->name('importaciones.sync.fill');
+    Route::post('importaciones/{importacion}/sync-overwrite', [ImportacionController::class, 'syncOverwrite'])->name('importaciones.sync.overwrite');
 
     Route::get('drive-browser', [DriveBrowserController::class, 'index'])->name('drive-browser.index');
     Route::get('drive-browser/{folderId}', [DriveBrowserController::class, 'show'])->name('drive-browser.show');

@@ -42,9 +42,31 @@ class SyncDorsalJob implements ShouldQueue
                 ->first();
         }
 
-        $processed = 0;
+        if ($importacion->modo_sync === 'overwrite') {
+            Foto::where('importacion_id', $importacion->id)
+                ->where('google_drive_parent_id', $this->folderId)
+                ->delete();
+        }
 
-$driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed): void {
+        $existingFileIds = [];
+        if ($importacion->modo_sync === 'incremental') {
+            $existingFileIds = Foto::where('importacion_id', $importacion->id)
+                ->where('google_drive_parent_id', $this->folderId)
+                ->pluck('google_drive_file_id')
+                ->all();
+        }
+
+        $processed = 0;
+        $skipped = 0;
+
+        $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveService, $importacion, $corredor, &$processed, &$skipped, $existingFileIds): void {
+            $fileId = $file->getId();
+
+            if ($importacion->modo_sync === 'incremental' && in_array($fileId, $existingFileIds, true)) {
+                $skipped++;
+                return;
+            }
+
             $parents = $file->getParents() ?? [];
             $parentId = null;
             if (is_array($parents) && count($parents) > 0) {
@@ -62,13 +84,13 @@ $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveSe
                 'corredor_id' => $corredor?->id,
                 'dorsal' => $this->dorsal,
                 'nombre_archivo' => $file->getName(),
-                'google_drive_file_id' => $file->getId(),
+                'google_drive_file_id' => $fileId,
                 'google_drive_parent_id' => $parentId,
                 'mime_type' => $file->getMimeType(),
                 'tamano_archivo' => $file->getSize() ?? 0,
                 'size' => $file->getSize() ?? 0,
                 'ruta_logica' => $this->rutaLogica($importacion->evento_id, $this->dorsal, $file->getName()),
-                'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($file->getId()),
+                'url_visualizacion' => $file->getWebViewLink() ?: $driveService->generateViewUrl($fileId),
                 'url_descarga' => null,
                 'estado' => FotoEstado::Disponible->value,
                 'fecha_modificacion' => $fechaModificacion,
@@ -105,6 +127,9 @@ $driveService->paginateFiles($this->folderId, [], function ($file) use ($driveSe
         });
 
         $importacion->increment('procesados', $processed);
+        if ($skipped > 0) {
+            $importacion->increment('procesados', $skipped);
+        }
         $importacion->increment('procesados_folders');
 
         $syncService->completeIfFinished($importacion);

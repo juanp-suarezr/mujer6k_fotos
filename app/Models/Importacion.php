@@ -26,6 +26,7 @@ class Importacion extends Model
         'fecha_fin',
         'last_error',
         'metadata',
+        'modo_sync',
     ];
 
     protected $casts = [
@@ -33,6 +34,10 @@ class Importacion extends Model
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
         'metadata' => 'array',
+    ];
+
+    protected $attributes = [
+        'modo_sync' => 'incremental',
     ];
 
     public function evento()

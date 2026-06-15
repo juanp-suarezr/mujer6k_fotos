@@ -29,6 +29,7 @@ class ImportacionRequest extends FormRequest
             'fecha_fin' => 'nullable|date',
             'last_error' => 'nullable|string',
             'metadata' => 'nullable|array',
+            'modo_sync' => ['nullable', 'string', 'max:32', Rule::in(['incremental', 'fill', 'overwrite'])],
         ];
     }
 }
