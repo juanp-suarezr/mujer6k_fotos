@@ -111,7 +111,7 @@ import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import AOS from 'aos';
@@ -158,8 +158,7 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    
-    axios.get(route('fotos.public.download', fotoId));
+    window.location.href = route('fotos.public.download', fotoId);
 };
 
 const goHome = () => {

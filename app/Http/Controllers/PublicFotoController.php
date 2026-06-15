@@ -83,8 +83,8 @@ class PublicFotoController extends Controller
                 ->get($url);
 
             $httpCode = $response->status();
-            $contentType = $response->headers('Content-Type');
-            $contentTypeString = is_array($contentType) ? ($contentType[0] ?? '') : $contentType;
+            $contentType = $response->header('Content-Type', 'application/octet-stream');
+            $contentLength = $response->header('Content-Length');
             $fileSize = file_exists($tempPath) ? filesize($tempPath) : 0;
 
             logger()->info('Respuesta recibida de Google Drive', [
@@ -92,6 +92,7 @@ class PublicFotoController extends Controller
                 'http_code' => $httpCode,
                 'content_type' => $contentType,
                 'file_size' => $fileSize,
+                'content_length' => $contentLength,
                 'temp_path' => $tempPath,
             ]);
 
@@ -105,11 +106,11 @@ class PublicFotoController extends Controller
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
             }
 
-            if (str_contains($contentTypeString ?? '', 'text/html')) {
+            if (str_contains($contentType ?? '', 'text/html')) {
                 @unlink($tempPath);
                 logger()->warning('Descarga fallida: contenido HTML recibido en lugar de imagen', [
                     'foto_id' => $foto->id,
-                    'content_type' => $contentTypeString,
+                    'content_type' => $contentType,
                     'url' => $url,
                 ]);
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
@@ -133,8 +134,8 @@ class PublicFotoController extends Controller
                 readfile($tempPath);
                 flush();
             }, basename($filename), [
-                'Content-Type' => $contentTypeString ?: 'application/octet-stream',
-                'Content-Length' => $fileSize,
+                'Content-Type' => $contentType ?: 'application/octet-stream',
+                'Content-Length' => $contentLength ?: $fileSize,
                 'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
                 'Cache-Control' => 'private, max-age=0',
                 'Pragma' => 'public',
