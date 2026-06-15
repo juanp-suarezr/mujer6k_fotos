@@ -123,7 +123,7 @@ const viewFoto = (foto) => {
 };
 
 const downloadFoto = (fotoId) => {
-    window.open(route('fotos.public.download', fotoId), '_blank');
+    window.location.href = route('fotos.public.download', fotoId);
 };
 
 </script>
