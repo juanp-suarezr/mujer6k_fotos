@@ -16,6 +16,33 @@
     </template>
 
     <div class="py-6">
+      <div class="max-w-7xl mx-auto mb-6 bg-blue-50 border border-blue-100 rounded-xl p-4">
+        <h3 class="text-sm font-semibold text-blue-800 mb-2">Opciones de sincronización</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-blue-900">
+          <div class="flex items-start gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-700 font-bold shrink-0">+</span>
+            <div>
+              <p class="font-semibold text-green-700">Incremental</p>
+              <p class="text-blue-800">Solo agrega archivos nuevos detectados en la carpeta de Drive. No modifica ni borra lo ya indexado.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold shrink-0">↻</span>
+            <div>
+              <p class="font-semibold text-purple-700">Rellenar datos</p>
+              <p class="text-blue-800">Completa metadatos o campos faltantes de archivos ya existentes sin duplicar registros.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700 font-bold shrink-0">⟲</span>
+            <div>
+              <p class="font-semibold text-red-700">Sobrescribir</p>
+              <p class="text-blue-800">Elimina todos los archivos de esta importación y vuelve a leer la carpeta completa desde cero.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-gray-600">
