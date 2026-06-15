@@ -49,10 +49,8 @@ class PublicFotoController extends Controller
     public function download(Foto $foto, Request $request)
     {
         Log::info('Descarga de foto', ['foto' => $foto]);
-        if ($foto->estado !== 'disponible') {
-            Log::error('Foto no disponible');
-            abort(404);
-        }
+        
+        
 
         if (!$foto->google_drive_file_id) {
             Log::error('Foto sin google drive file id');
