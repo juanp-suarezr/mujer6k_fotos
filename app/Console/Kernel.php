@@ -13,7 +13,17 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('sanctum:prune-expired --hours=24')->daily();
+        $schedule->call(function () {
+            Log::info('Scheduler ejecutado correctamente: ' . now());
+        })->everyMinute();
+
+        $schedule->command('queue:work --stop-when-empty --tries=3')
+                 ->everyMinute()
+                 ->withoutOverlapping();
+
+        $schedule->command('sanctum:prune-expired --hours=24')
+                 ->daily();
+
     }
 
     /**
