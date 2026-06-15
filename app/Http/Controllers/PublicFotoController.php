@@ -109,7 +109,7 @@ class PublicFotoController extends Controller
                 @unlink($tempPath);
                 logger()->warning('Descarga fallida: contenido HTML recibido en lugar de imagen', [
                     'foto_id' => $foto->id,
-                'content_type' => $contentTypeString,
+                    'content_type' => $contentTypeString,
                     'url' => $url,
                 ]);
                 return redirect()->away('https://drive.google.com/file/d/' . $foto->google_drive_file_id . '/preview');
@@ -125,13 +125,21 @@ class PublicFotoController extends Controller
             logger()->info('Enviando archivo al navegador', [
                 'foto_id' => $foto->id,
                 'filename' => basename($filename),
-                'content_type' => $contentType,
+                'content_type' => $contentTypeString,
                 'file_size' => $fileSize,
             ]);
 
-            return response()->download($tempPath, basename($filename), [
+            return response()->streamDownload(function () use ($tempPath) {
+                readfile($tempPath);
+                flush();
+            }, basename($filename), [
                 'Content-Type' => $contentTypeString ?: 'application/octet-stream',
-            ])->deleteFileAfterSend(true);
+                'Content-Length' => $fileSize,
+                'Content-Disposition' => 'attachment; filename="' . basename($filename) . '"',
+                'Cache-Control' => 'private, max-age=0',
+                'Pragma' => 'public',
+                'Expires' => '0',
+            ]);
         } catch (\Exception $e) {
             if (file_exists($tempPath)) {
                 @unlink($tempPath);
