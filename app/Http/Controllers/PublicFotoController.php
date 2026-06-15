@@ -8,6 +8,7 @@ use App\Services\GoogleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class PublicFotoController extends Controller
 {
