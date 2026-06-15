@@ -150,7 +150,7 @@
             <div class="container mx-auto flex flex-wrap items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center flex-shrink-0 mr-6 w-1/6">
-                    <a href="/Welcome" class="w-full">
+                    <a href="/" class="w-full">
                         <figure>
                             <img v-if="HandleContrast" class="w-full" :src="logoBlanco" alt="imagen de logo"
                                 title="Alcaldía de Pereira">

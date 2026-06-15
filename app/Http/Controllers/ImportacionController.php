@@ -63,10 +63,11 @@ class ImportacionController extends Controller
             ->with('success', 'Importación creada correctamente');
     }
 
-    function edit(Importacion $importacion)
+    function edit(Request $request, $importacion_id)
     {
+        $importacion = Importacion::findOrFail($importacion_id);
         return Inertia::render('Importaciones/Edit', [
-            'importacion' => $importacion->load(['evento', 'logs', 'googleConnection']),
+            'importacion' => $importacion,
             'eventos' => Evento::all(),
             'googleConnections' => GoogleConnection::all(),
             'progress' => $this->syncService->progress($importacion),
@@ -95,8 +96,14 @@ class ImportacionController extends Controller
 
         $importacion->update($data);
 
-        return redirect()->route('importaciones.edit', $importacion->id)
-            ->with('success', 'Importación actualizada correctamente');
+        return Inertia::render('Importaciones/Edit', [
+            'importacion' => $importacion->load(['evento', 'logs', 'googleConnection']),
+            'eventos' => Evento::all(),
+            'googleConnections' => GoogleConnection::all(),
+            'progress' => $this->syncService->progress($importacion),
+            'fotos' => $importacion->fotos()->orderByDesc('id')->limit(100)->get(),
+            'fotos_count' => $importacion->fotos()->count(),
+        ])->with('success', 'Importación actualizada correctamente');
     }
 
     function sync(Importacion $importacion)

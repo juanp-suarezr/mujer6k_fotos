@@ -14,7 +14,7 @@
       <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
           <h3 class="text-lg font-semibold text-gray-800">Editar Importación</h3>
-          <p class="text-sm text-gray-500 mt-1">Configuración y seguimiento de la importación</p>
+          <p class="text-sm text-gray-500 mt-1">Configura los datos de la importación</p>
         </div>
 
         <form @submit.prevent="submit" class="p-6 space-y-5">
@@ -127,7 +127,7 @@
               <p class="text-sm text-gray-500">Errores</p>
             </div>
             <div class="text-center">
-              <p class="text-3xl font-bold text-gray-900">{{ importacion.fotos?.length || 0 }}</p>
+              <p class="text-3xl font-bold text-gray-900">{{ fotos_count }}</p>
               <p class="text-sm text-gray-500">Total fotos</p>
             </div>
           </div>
@@ -204,7 +204,7 @@
                 <td class="px-6 py-3 text-gray-700">{{ log.mensaje }}</td>
                 <td class="px-6 py-3 text-gray-400 text-xs">{{ formatDate(log.created_at) }}</td>
               </tr>
-              <tr v-if="!importacion.logs?.length">
+              <tr v-if="importacion.logs?.length === 0 || !importacion.logs">
                 <td colspan="3" class="px-6 py-8 text-center text-gray-400">Sin logs registrados</td>
               </tr>
             </tbody>
@@ -230,7 +230,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, router } from '@inertiajs/vue3';
 import { ArrowPathIcon, PhotoIcon, TrashIcon, ArrowLeftIcon, CheckIcon } from '@heroicons/vue/24/solid';
@@ -244,6 +243,8 @@ const props = defineProps({
   eventos: { type: Array, required: true },
   googleConnections: { type: Array, default: () => [] },
 });
+
+console.log(props);
 
 const form = useForm({
   evento_id: props.importacion.evento_id,
