@@ -110,9 +110,9 @@ class GoogleDriveService implements StorageDrive
         return "https://drive.google.com/file/d/{$this->assertDriveId($fileId)}/view";
     }
 
-    public function getDownloadUrl(string $fileId): ?string
+    public function getDownloadUrl(string $fileId): string
     {
-        return null;
+        return 'https://drive.usercontent.google.com/download?id=' . $this->assertDriveId($fileId) . '&export=download';
     }
 
     public function getDrive(): DriveService
