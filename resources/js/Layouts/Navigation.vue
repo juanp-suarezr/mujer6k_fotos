@@ -36,6 +36,10 @@
             </nav-link>
 
             <SeparadorMenu>Administración</SeparadorMenu>
+            <nav-link :href="route('welcome-config.edit')" :active="route().current().includes('welcome-config')">
+                <AdjustmentsHorizontalIcon class="h-6 w-6 text-white" />
+                <span class="mx-3">Configurar Inicio</span>
+            </nav-link>
             <nav-link :href="route('users.index')" :active="route().current().includes('users')">
                 <UsersIcon class="h-6 w-6 text-white" />
                 <span class="mx-3">Usuarios</span>
@@ -53,7 +57,7 @@ import NavLink from '@/Components/NavLink.vue';
 import SeparadorMenu from "@/Components/SeparadorMenu.vue";
 import imglogo_w from '/public/assets/img/logo_white.webp'
 import { ref } from 'vue'
-import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon, UsersIcon, KeyIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/solid'
+import { HomeIcon, UserGroupIcon, CalendarIcon, CameraIcon, UsersIcon, KeyIcon, ArrowDownTrayIcon, AdjustmentsHorizontalIcon } from '@heroicons/vue/24/solid'
 
 export default {
     components: {
@@ -66,6 +70,7 @@ export default {
         CameraIcon,
         KeyIcon,
         ArrowDownTrayIcon,
+        AdjustmentsHorizontalIcon,
     },
 
     setup() {

@@ -30,7 +30,7 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
+Route::get('/', function (\App\Services\WelcomeConfigService $configService) {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
@@ -45,6 +45,7 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
         'eventos' => $eventos,
         'defaultEventoId' => $eventos->first()?->id ?? '',
+        'welcomeConfig' => $configService->getAll(),
     ]);
 })->name('welcome');
 
@@ -83,6 +84,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('corredores', CorredorController::class);
     Route::resource('fotos', FotoController::class);
     Route::resource('importaciones', ImportacionController::class);
+
+    Route::get('/configuracion-inicio', [\App\Http\Controllers\WelcomeConfigController::class, 'edit'])->name('welcome-config.edit');
+    Route::post('/configuracion-inicio', [\App\Http\Controllers\WelcomeConfigController::class, 'update'])->name('welcome-config.update');
+    Route::post('/configuracion-inicio/reset', [\App\Http\Controllers\WelcomeConfigController::class, 'reset'])->name('welcome-config.reset');
 
     Route::get('importaciones/{importacion}/progress', [ImportacionController::class, 'progress'])->name('importaciones.progress');
 

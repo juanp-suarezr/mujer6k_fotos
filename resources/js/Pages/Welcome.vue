@@ -35,6 +35,10 @@ const props = defineProps({
         type: [String, Number],
         default: '',
     },
+    welcomeConfig: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const isContrast = ref(usePage().props.accesibilidad.contraste);
@@ -283,7 +287,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
 
                 <!-- Runners background image -->
                 <img 
-                    src="/assets/img/fondo.webp" 
+                    :src="welcomeConfig.hero_imagen || '/assets/img/fondo.webp'" 
                     alt="Corredores en carrera"
                     class="absolute inset-0 w-full h-full object-cover object-[center_30%] sm:object-center scale-105"
                     style="filter: saturate(1.1) contrast(1.05);"
@@ -384,28 +388,28 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                             :class="{ '!bg-yellow-200/30 !border-yellow-300': isContrast }">
                             <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-[#FFC107] animate-pulse"></span>
                             <span class="text-[9px] sm:text-xs font-semibold text-white/80 uppercase tracking-widest">
-                                Plataforma Oficial
+                                {{ welcomeConfig.hero_badge || 'Plataforma Oficial' }}
                             </span>
                         </div>
 
                         <!-- Main Title -->
                         <h1 class="main-title-gradient max-w-full min-w-0 text-2xl sm:text-3xl md:text-5xl lg:text-5xl xl:text-6xl font-black mb-1 sm:mb-2"
                             :class="{ '!bg-none !text-yellow-200': isContrast }">
-                            CONSULTA TUS FOTOS
+                            {{ welcomeConfig.hero_titulo || 'CONSULTA TUS FOTOS' }}
                         </h1>
 
                         <!-- Subtitle with reveal -->
                         <h2 class="text-xl sm:text-2xl md:text-2xl lg:text-2xl xl:text-2xl font-extrabold text-white/90 mt-1 sm:mt-2 mb-4 sm:mb-6 tracking-wide"
                             :class="{ '!text-yellow-200': isContrast }"
                             data-aos="fade-up" data-aos-delay="200">
-                            POR DORSAL
+                            {{ welcomeConfig.hero_subtitulo || 'POR DORSAL' }}
                         </h2>
 
                         <!-- Description -->
                         <p class="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-xl mb-5 sm:mb-8 leading-relaxed"
                             :class="[{ '!text-white !font-bold': isContrast }, getLetterSize(letraSize)]"
                             data-aos="fade-up" data-aos-delay="300">
-                            Encuentra, descarga y comparte tus fotografías oficiales del evento.
+                            {{ welcomeConfig.hero_descripcion || 'Encuentra, descarga y comparte tus fotografías oficiales del evento.' }}
                         </p>
 
                         <!-- Search Box - Glassmorphism + Interactive -->
@@ -549,7 +553,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                             <div class="h-[1px] w-16 sm:w-24 bg-gradient-to-r from-[#FFC107] to-transparent mb-2 sm:mb-4"></div>
                             <p class="text-xs sm:text-base lg:text-lg font-light text-gray-400 italic tracking-wide"
                                 :class="{ '!text-yellow-200 !font-bold !not-italic': isContrast }">
-                                "Pereira, una ciudad que avanza"
+                                "{{ welcomeConfig.hero_lema || 'Pereira, una ciudad que avanza' }}"
                             </p>
                         </div>
                     </div>
@@ -577,7 +581,7 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
         <!-- ============================================================ -->
         <!-- FEATURED EVENTS / CTA SECTION -->
         <!-- ============================================================ -->
-        <section class="relative w-full py-16 sm:py-20 lg:py-24 bg-[#F2F2F2] overflow-hidden"
+        <section v-if="welcomeConfig.seccion2_mostrar !== false" class="relative w-full py-16 sm:py-20 lg:py-24 bg-[#F2F2F2] overflow-hidden"
             :class="{ '!bg-black': isContrast }">
             
             <div class="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 xl:px-20">
@@ -588,14 +592,14 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                         <div class="relative">
                             <div class="absolute -top-4 -left-4 w-full h-full rounded-2xl border-2 border-[#F57C00]/30"></div>
                             <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                                <img src="/assets/img/mujerValiente.webp"
-                                    alt="Mujer Valiente 6K" 
+                                <img :src="welcomeConfig.seccion2_imagen || '/assets/img/mujerValiente.webp'"
+                                    :alt="welcomeConfig.seccion2_titulo_resaltado || 'Evento destacado'" 
                                     class="w-full h-64 sm:h-80 lg:h-96 object-cover"
                                     loading="lazy" />
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                                 <div class="absolute bottom-4 sm:bottom-6 left-4 sm:left-6">
                                     <span class="inline-block px-3 py-1 bg-[#FFC107]/90 text-black text-xs sm:text-sm font-bold rounded-full">
-                                        #MujerValiente6K
+                                        {{ welcomeConfig.seccion2_badge || '#MujerValiente6K' }}
                                     </span>
                                 </div>
                             </div>
@@ -606,31 +610,30 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
                     <div class="w-full lg:w-1/2 text-center lg:text-left" data-aos="fade-left">
                         <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight"
                             :class="{ '!text-yellow-200': isContrast }">
-                            ¿Participaste en la
+                            {{ welcomeConfig.seccion2_titulo || '¿Participaste en la' }}
                             <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#F57C00] to-[#D32F2F]">
-                                Mujer Valiente 6K
+                                {{ welcomeConfig.seccion2_titulo_resaltado || 'Mujer Valiente 6K' }}
                             </span>?
                         </h2>
                         <p class="text-sm sm:text-base lg:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
                             :class="{ '!text-white !font-bold': isContrast }">
-                            Todos los participantes pueden encontrar, descargar y compartir sus fotos oficiales de la carrera. 
-                            ¡Tu momento de gloria está a solo un dorsal de distancia!
+                            {{ welcomeConfig.seccion2_descripcion || 'Todos los participantes pueden encontrar, descargar y compartir sus fotos oficiales de la carrera. ¡Tu momento de gloria está a solo un dorsal de distancia!' }}
                         </p>
                         <div class="flex flex-wrap gap-4 items-center justify-center lg:justify-start">
-                            <a href="#inicio"
+                            <a :href="welcomeConfig.seccion2_boton1_url || '#inicio'"
                                 class="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#F57C00] to-[#D32F2F] text-white font-extrabold text-sm sm:text-base tracking-wider rounded-xl
                                     hover:from-[#FF9800] hover:to-[#E53935] transition-all duration-300 transform hover:scale-105 active:scale-95
                                     shadow-[0_4px_20px_rgba(245,124,0,0.4)] hover:shadow-[0_6px_30px_rgba(245,124,0,0.6)]
                                     text-center btn-pulse">
-                                BUSCAR MIS FOTOS
+                                {{ welcomeConfig.seccion2_boton1_texto || 'BUSCAR MIS FOTOS' }}
                             </a>
-                            <a href="https://www.pereira.gov.co" target="_blank"
+                            <a :href="welcomeConfig.seccion2_boton2_url || 'https://www.pereira.gov.co'" target="_blank"
                                 class="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-800 font-bold text-sm sm:text-base tracking-wider rounded-xl
                                     border-2 border-gray-200 hover:border-[#F57C00]/50 hover:text-[#F57C00]
                                     transition-all duration-300 transform hover:scale-105 active:scale-95
                                     text-center"
                                 :class="{ '!bg-yellow-200 !text-black !border-yellow-200': isContrast }">
-                                MÁS INFORMACIÓN
+                                {{ welcomeConfig.seccion2_boton2_texto || 'MÁS INFORMACIÓN' }}
                             </a>
 
                             <!-- Button for photos without dorsal - prominent yellow -->
