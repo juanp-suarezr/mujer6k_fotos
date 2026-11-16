@@ -13,12 +13,23 @@ class PublicFotoController extends Controller
 {
     public function index(Request $request)
     {
-        $eventos = Evento::select('id', 'nombre')->get();
+        $eventos = Evento::select('id', 'nombre', 'fecha_evento')
+            ->orderByDesc('fecha_evento')
+            ->orderByDesc('id')
+            ->get();
+
+        $defaultEventoId = $eventos->first()?->id;
+
+        if (!$request->has('evento_id')) {
+            $selectedEventoId = $defaultEventoId ? (string) $defaultEventoId : '';
+        } else {
+            $selectedEventoId = (string) $request->query('evento_id', '');
+        }
 
         $fotos = collect([]);
         $filters = [
             'dorsal' => $request->query('dorsal', ''),
-            'evento_id' => $request->query('evento_id', ''),
+            'evento_id' => $selectedEventoId !== '' ? (int) $selectedEventoId : '',
         ];
 
         if ($request->filled('dorsal')) {
@@ -26,8 +37,8 @@ class PublicFotoController extends Controller
                 ->where('estado', 'disponible')
                 ->where('dorsal', $request->dorsal);
 
-            if ($request->filled('evento_id')) {
-                $query->where('evento_id', $request->evento_id);
+            if ($selectedEventoId !== '') {
+                $query->where('evento_id', $selectedEventoId);
             }
 
             $fotos = $query->get();
@@ -71,19 +82,40 @@ class PublicFotoController extends Controller
 
     public function sinDorsal(Request $request)
     {
-        $eventos = Evento::select('id', 'nombre')->get();
+        $eventos = Evento::select('id', 'nombre', 'fecha_evento')
+            ->orderByDesc('fecha_evento')
+            ->orderByDesc('id')
+            ->get();
 
-        $fotos = Foto::with(['evento'])
+        // Determinar el evento por defecto (el más reciente)
+        $defaultEventoId = $eventos->first()?->id;
+
+        // Si en la petición no viene evento_id (primera carga), se usa el evento más reciente
+        if (!$request->has('evento_id')) {
+            $selectedEventoId = $defaultEventoId ? (string) $defaultEventoId : '';
+        } else {
+            $selectedEventoId = (string) $request->query('evento_id', '');
+        }
+
+        $query = Foto::with(['evento'])
             ->where('estado', 'disponible')
             ->where(function ($query) {
                 $query->whereNull('dorsal')
                     ->orWhere('dorsal', '');
-            })
-            ->paginate(10);
+            });
+
+        if ($selectedEventoId !== '') {
+            $query->where('evento_id', $selectedEventoId);
+        }
+
+        $fotos = $query->latest('id')
+            ->paginate(12)
+            ->appends(['evento_id' => $selectedEventoId]);
 
         return Inertia::render('Public/Fotos/SinDorsal', [
             'eventos' => $eventos,
             'fotos' => $fotos,
+            'selectedEventoId' => $selectedEventoId !== '' ? (int) $selectedEventoId : '',
         ]);
     }
 }

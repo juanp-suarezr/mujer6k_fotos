@@ -22,17 +22,25 @@
                 <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-8" data-aos="fade-up" data-aos-delay="100">
                     <form @submit.prevent="searchFotos" class="space-y-4">
                         <div>
-                            <InputLabel for="evento_id" value="Evento (opcional)" />
-                            <select
-                                id="evento_id"
-                                v-model="form.evento_id"
-                                class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500"
-                            >
-                                <option value="">Todos los eventos</option>
-                                <option v-for="evento in eventos" :key="evento.id" :value="evento.id">
-                                    {{ evento.nombre }}
-                                </option>
-                            </select>
+                            <InputLabel for="evento_id" value="Evento" class="flex items-center gap-1.5 font-semibold text-gray-700">
+                                <CalendarDaysIcon class="w-4 h-4 text-amber-500 inline mr-1" />
+                                <span>Evento</span>
+                            </InputLabel>
+                            <div class="relative mt-1">
+                                <select
+                                    id="evento_id"
+                                    v-model="form.evento_id"
+                                    class="block w-full border-gray-300 rounded-xl shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm font-semibold p-3 pr-10 appearance-none bg-gray-50/60 hover:bg-gray-100/70 transition-colors cursor-pointer"
+                                >
+                                    <option value="">Todos los eventos</option>
+                                    <option v-for="evento in eventos" :key="evento.id" :value="evento.id">
+                                        {{ evento.nombre }}
+                                    </option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                    <ChevronDownIcon class="w-5 h-5" />
+                                </div>
+                            </div>
                         </div>
 
                         <div>
@@ -113,7 +121,7 @@ import TextInput from '@/Components/TextInput.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PhotoIcon, ArrowDownTrayIcon, EyeIcon, CalendarDaysIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import axios from 'axios';

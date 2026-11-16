@@ -12,6 +12,18 @@ class ImportacionRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('carpeta_drive_id') && is_string($this->carpeta_drive_id)) {
+            $value = trim($this->carpeta_drive_id);
+            if (preg_match('#/folders/([a-zA-Z0-9_-]+)#', $value, $matches)) {
+                $this->merge(['carpeta_drive_id' => $matches[1]]);
+            } elseif (preg_match('#[?&]id=([a-zA-Z0-9_-]+)#', $value, $matches)) {
+                $this->merge(['carpeta_drive_id' => $matches[1]]);
+            }
+        }
+    }
+
     public function rules(): array
     {
         return [

@@ -18,7 +18,7 @@ AOS.init();
 
 const swal = inject('$swal');
 
-defineProps({
+const props = defineProps({
     laravelVersion: {
         type: String,
         required: true,
@@ -26,6 +26,14 @@ defineProps({
     phpVersion: {
         type: String,
         required: true,
+    },
+    eventos: {
+        type: Array,
+        default: () => [],
+    },
+    defaultEventoId: {
+        type: [String, Number],
+        default: '',
     },
 });
 
@@ -66,7 +74,7 @@ const getLetterSize = size => {
 
 const form = useForm({
     dorsal: '',
-    evento_id: '',
+    evento_id: props.defaultEventoId || '',
 });
 
 const submitSearch = () => {
@@ -402,6 +410,33 @@ const suggestedDorsals = ['1542', '0891', '2317', '0456', '3721'];
 
                         <!-- Search Box - Glassmorphism + Interactive -->
                         <div class="max-w-xl mb-8 sm:mb-12" data-aos="fade-up" data-aos-delay="400">
+                            <!-- Selector de Evento -->
+                            <div v-if="eventos && eventos.length > 0" class="mb-3">
+                                <div class="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-xl border border-white/20 px-3.5 py-2 text-white shadow-sm hover:border-[#FFC107]/50 transition-colors"
+                                    :class="{ '!bg-yellow-200/10 !border-yellow-300': isContrast }">
+                                    <FireIcon class="w-4 h-4 text-[#FFC107] flex-shrink-0" :class="{ '!text-yellow-200': isContrast }" />
+                                    <label for="welcome_evento_id" class="text-xs font-bold text-white/90 whitespace-nowrap" :class="{ '!text-yellow-200': isContrast }">
+                                        Evento:
+                                    </label>
+                                    <div class="relative flex-1">
+                                        <select
+                                            id="welcome_evento_id"
+                                            v-model="form.evento_id"
+                                            class="w-full bg-transparent text-white text-xs sm:text-sm font-semibold border-0 focus:ring-0 p-0 pr-6 cursor-pointer appearance-none truncate"
+                                            :class="{ '!text-yellow-200': isContrast }"
+                                        >
+                                            <option value="" class="bg-gray-900 text-white">Todos los eventos</option>
+                                            <option v-for="evento in eventos" :key="evento.id" :value="evento.id" class="bg-gray-900 text-white">
+                                                {{ evento.nombre }}
+                                            </option>
+                                        </select>
+                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center text-white/70">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <form @submit.prevent="submitSearch" class="relative group">
                                 <!-- Glassmorphism container -->
                                 <div class="relative flex flex-col sm:flex-row items-stretch sm:items-center bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] 

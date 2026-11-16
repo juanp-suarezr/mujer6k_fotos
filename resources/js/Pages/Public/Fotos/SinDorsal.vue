@@ -12,11 +12,42 @@
                     <p class="text-gray-600">Imágenes que aún no han sido asignadas a un número de dorsal</p>
                 </div>
 
+                <!-- Selector de Evento -->
+                <div class="max-w-md mx-auto mb-8" data-aos="fade-up" data-aos-delay="100">
+                    <div class="bg-white rounded-2xl shadow-md p-4 sm:p-5 border border-gray-100">
+                        <label for="evento-selector" class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2 flex items-center gap-2">
+                            <CalendarDaysIcon class="w-4 h-4 text-amber-500" />
+                            Seleccionar Evento
+                        </label>
+                        <div class="relative">
+                            <select
+                                id="evento-selector"
+                                v-model="selectedEvento"
+                                @change="handleEventoChange"
+                                class="w-full bg-gray-50 hover:bg-gray-100/70 border border-gray-300 text-gray-800 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 block p-3 pr-10 appearance-none transition-all duration-200 cursor-pointer shadow-sm"
+                            >
+                                <option value="">Todos los eventos</option>
+                                <option v-for="evento in eventos" :key="evento.id" :value="evento.id">
+                                    {{ evento.nombre }}
+                                </option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                <ChevronDownIcon class="w-5 h-5" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Results Section -->
                 <div v-if="fotos.data.length > 0" data-aos="fade-up" data-aos-delay="200">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
-                        Galería ({{ fotos.total }} fotos)
-                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+                        <h2 class="text-xl font-semibold text-gray-800">
+                            Galería ({{ fotos.total }} fotos)
+                        </h2>
+                        <span v-if="selectedEventoNombre" class="inline-flex items-center text-xs font-semibold px-3 py-1 bg-amber-100 text-amber-800 rounded-full w-fit">
+                            {{ selectedEventoNombre }}
+                        </span>
+                    </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 z-10">
                         <div
@@ -26,7 +57,6 @@
                         >
                             <div class="thumbnail-container bg-gray-200 relative">
                                 <div class="w-full h-full flex items-center justify-center">
-                                    <!-- <PhotoIcon class="h-12 w-12 text-gray-400" /> -->
                                     <iframe class="cursor-none pointer-events-none" loading="lazy" :src="`https://drive.google.com/file/d/${foto.google_drive_file_id}/preview`" width="100%" height="100%"></iframe>
                                 </div>
                             </div>
@@ -54,7 +84,9 @@
 
                 <div v-else class="text-center py-12" data-aos="fade-up">
                     <PhotoIcon class="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                    <p class="text-gray-500 text-lg">No hay fotos sin dorsal disponibles en este momento</p>
+                    <p class="text-gray-500 text-lg">
+                        {{ selectedEvento ? 'No hay fotos sin dorsal disponibles para este evento' : 'No hay fotos sin dorsal disponibles en este momento' }}
+                    </p>
                 </div>
 
                 <!-- Back Button -->
@@ -75,16 +107,16 @@
 <script setup>
 import PageLayout from '@/Layouts/PageLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Head, Link } from '@inertiajs/vue3';
-import { onMounted } from 'vue';
-import { PhotoIcon, ArrowLeftIcon, ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch, computed, onMounted } from 'vue';
+import { PhotoIcon, ArrowLeftIcon, ArrowDownTrayIcon, CalendarDaysIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 import Pagination from '@/Components/Pagination.vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 AOS.init();
 
-defineProps({
+const props = defineProps({
     eventos: {
         type: Array,
         required: true,
@@ -93,7 +125,34 @@ defineProps({
         type: Object,
         required: true,
     },
+    selectedEventoId: {
+        type: [String, Number],
+        default: '',
+    },
 });
+
+const selectedEvento = ref(props.selectedEventoId ?? '');
+
+watch(() => props.selectedEventoId, (newVal) => {
+    selectedEvento.value = newVal ?? '';
+});
+
+const selectedEventoNombre = computed(() => {
+    if (!selectedEvento.value) return null;
+    const found = props.eventos.find(e => String(e.id) === String(selectedEvento.value));
+    return found ? found.nombre : null;
+});
+
+const handleEventoChange = () => {
+    router.get(
+        route('fotos.public.sin-dorsal'),
+        { evento_id: selectedEvento.value },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
+};
 
 onMounted(async () => {
     AOS.refresh();
@@ -125,7 +184,6 @@ const viewFoto = (foto) => {
 const downloadFoto = (fotoId) => {
     window.location.href = route('fotos.public.download', fotoId);
 };
-
 </script>
 
 <style scoped>

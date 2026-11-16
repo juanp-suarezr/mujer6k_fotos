@@ -35,9 +35,16 @@ Route::get('/', function () {
         return redirect()->route('dashboard');
     }
 
+    $eventos = \App\Models\Evento::select('id', 'nombre', 'fecha_evento')
+        ->orderByDesc('fecha_evento')
+        ->orderByDesc('id')
+        ->get();
+
     return Inertia::render('Welcome', [
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'eventos' => $eventos,
+        'defaultEventoId' => $eventos->first()?->id ?? '',
     ]);
 })->name('welcome');
 
